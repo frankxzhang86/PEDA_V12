@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-PEDA自动化处理工具 V9 - 主启动脚本
-V9独立版本的主入口点
+PEDA自动化处理工具 V12 - 主启动脚本
+V12独立版本的主入口点
 """
 
 import sys
@@ -14,7 +14,7 @@ if getattr(sys, 'frozen', False):
     if os.path.exists(libs_path):
         sys.path.insert(0, libs_path)
 
-# 确保当前目录（V9根目录）在Python路径中
+# 确保当前目录（V12根目录）在Python路径中
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
@@ -36,10 +36,10 @@ def main():
     try:
         print(">>> main() started")
         print("=" * 70)
-        print("🚀 PEDA自动化处理工具 V9")
+        print("🚀 PEDA自动化处理工具 V12")
         print("=" * 70)
         print("版本特点:")
-        print("✅ 独立V9版本")
+        print("✅ 独立V12版本")
         print("✅ 现代化GUI界面")
         print("✅ 三语言支持 (English/Deutsch/中文)")
         print("✅ 完整的模块化架构")
