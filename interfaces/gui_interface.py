@@ -4,8 +4,10 @@
 
 
 def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, password: str, 
-                          system_language: str = 'en', progress_callback=None, log_callback=None, upload_record_callback=None, login_url=None):
-    print(f"[DEBUG] run_with_gui_params_v2 called with excel_path={excel_path}, document_path={document_path}, username={username}, password={password}, system_language={system_language}, login_url={login_url}")
+                          system_language: str = 'en', progress_callback=None, log_callback=None, 
+                          upload_record_callback=None, login_url=None, 
+                          browser_path=None, preferred_browser="auto"):
+    print(f"[DEBUG] run_with_gui_params_v2 called with excel_path={excel_path}, document_path={document_path}, username={username}, password={password}, system_language={system_language}, login_url={login_url}, browser_path={browser_path}, preferred_browser={preferred_browser}")
     """
     从GUI调用的主要处理函数（浏览器复用版本）
     
@@ -19,6 +21,8 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
         log_callback: 日志回调函数
         upload_record_callback: 上传记录回调函数
         login_url: 登录页面URL
+        browser_path: 自定义浏览器路径（可选）
+        preferred_browser: 首选浏览器类型 ("chrome", "msedge", "auto")
     """
     try:
         # 延迟导入，避免主GUI启动变慢
@@ -82,7 +86,9 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
                 progress_callback=progress_callback,
                 log_callback=log_callback,
                 upload_record_callback=upload_record_callback,
-                login_url=login_url
+                login_url=login_url,
+                browser_path=browser_path,
+                preferred_browser=preferred_browser
             )
         print(f"[DEBUG] run_batch_with_reuse returned: {result}")
         

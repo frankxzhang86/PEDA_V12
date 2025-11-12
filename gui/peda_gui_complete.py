@@ -383,6 +383,10 @@ class PEDAAutomationGUI:
                 'current_language': self.current_language,
                 'system_language': self.system_language,
                 'login_url': self.login_url_var.get(),
+                'browser': {
+                    'preferred_type': getattr(self, 'browser_preferred_type', 'auto'),
+                    'custom_path': getattr(self, 'browser_custom_path', None)
+                }
             }
             
             with open(self.config_file, 'w', encoding='utf-8') as f:
@@ -422,6 +426,11 @@ class PEDAAutomationGUI:
                 self.system_language = config.get('system_language', 'zh')
                 
                 self.login_url_var.set(config.get('login_url', ''))
+                
+                # 加载浏览器配置
+                browser_config = config.get('browser', {})
+                self.browser_preferred_type = browser_config.get('preferred_type', 'auto')
+                self.browser_custom_path = browser_config.get('custom_path', None)
                 
                 self.update_ui_texts()
                 self.update_language_buttons()

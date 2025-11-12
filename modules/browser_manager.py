@@ -1,7 +1,7 @@
 import os
 from playwright.sync_api import Playwright, Browser, BrowserContext, Page
 from typing import Optional, Callable
-from start import get_chrome_executable
+from .browser_finder import BrowserFinder
 
 # 导入登录相关模块
 from .system_handler import handle_login_popup, set_language_after_login
@@ -28,6 +28,9 @@ class BrowserManager:
         self.password: str = ""
         self.system_language: str = "en"
         self.log_callback: Optional[Callable] = None
+        self.browser_finder: BrowserFinder = None
+        self.browser_path: Optional[str] = None
+        self.browser_type: Optional[str] = None
         
     def set_log_callback(self, callback: Callable):
         """设置日志回调函数"""
@@ -41,7 +44,8 @@ class BrowserManager:
             print(f"[{level}] {message}")
     
     def initialize(self, playwright: Playwright, username: str, password: str, 
-                   system_language: str = 'en', login_url: Optional[str] = None) -> bool:
+                   system_language: str = 'en', login_url: Optional[str] = None,
+                   browser_path: Optional[str] = None, preferred_browser: str = "auto") -> bool:
         """
         初始化浏览器并登录
         
@@ -51,6 +55,8 @@ class BrowserManager:
             password: 密码
             system_language: 系统语言
             login_url: 登录网址
+            browser_path: 自定义浏览器路径（可选）
+            preferred_browser: 首选浏览器类型 ("chrome", "msedge", "auto")
             
         Returns:
             bool: 初始化成功返回True
@@ -65,9 +71,25 @@ class BrowserManager:
             self.system_language = system_language
             self.login_url = login_url or "https://frd-pim-app.emea.zf-world.com/webui/WebUI_2#deepLink=1&contextID=GL&workspaceID=Main&screen=homepage"
             
+            # 初始化浏览器查找器
+            self.browser_finder = BrowserFinder(log_callback=self.log_callback)
+            
+            # 查找浏览器
+            self.browser_path, self.browser_type = self.browser_finder.find_browser(
+                preferred_browser=preferred_browser,
+                custom_path=browser_path
+            )
+            
+            if not self.browser_path:
+                self.log("❌ 未找到可用的浏览器，请安装 Chrome 或 Edge", "ERROR")
+                return False
+            
             # 启动浏览器
-            self.log("启动浏览器...")
-            self.browser = self.playwright.chromium.launch(headless=False, executable_path=get_chrome_executable())
+            self.log(f"启动浏览器: {self.browser_type} ({self.browser_path})...")
+            self.browser = self.playwright.chromium.launch(
+                headless=False, 
+                executable_path=self.browser_path
+            )
             self.context = self.browser.new_context()
             self.page = self.context.new_page()
             

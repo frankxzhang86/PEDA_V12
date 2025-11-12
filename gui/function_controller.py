@@ -174,6 +174,10 @@ class FunctionController:
             # 根据模式选择处理函数
             if self.use_browser_reuse:
                 print("[DEBUG] about to call run_with_gui_params_v2")
+                # 获取浏览器配置
+                browser_path = getattr(self.app, 'browser_custom_path', None)
+                preferred_browser = getattr(self.app, 'browser_preferred_type', 'auto')
+                
                 result = run_with_gui_params_v2(
                     excel_path=excel_path,
                     document_path=document_path,
@@ -182,7 +186,9 @@ class FunctionController:
                     system_language=system_language,
                     progress_callback=self.update_progress_from_callback,
                     log_callback=self.log_message_from_callback,
-                    upload_record_callback=self.add_upload_record
+                    upload_record_callback=self.add_upload_record,
+                    browser_path=browser_path,
+                    preferred_browser=preferred_browser
                 )
                 print(f"[DEBUG] run_with_gui_params_v2 returned: {result}")
             else:

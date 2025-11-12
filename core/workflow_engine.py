@@ -15,7 +15,9 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
                         progress_callback: Optional[Callable] = None, 
                         log_callback: Optional[Callable] = None,
                         upload_record_callback: Optional[Callable] = None,
-                        login_url: Optional[str] = None) -> Dict[str, int]:
+                        login_url: Optional[str] = None,
+                        browser_path: Optional[str] = None,
+                        preferred_browser: str = "auto") -> Dict[str, int]:
     """
     批量处理多行数据（浏览器复用版本）
     
@@ -29,6 +31,8 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
         log_callback: 日志回调函数
         upload_record_callback: 上传记录回调函数
         login_url: 登录网址
+        browser_path: 自定义浏览器路径（可选）
+        preferred_browser: 首选浏览器类型 ("chrome", "msedge", "auto")
         
     Returns:
         Dict[str, int]: 处理结果统计
@@ -56,7 +60,9 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
     try:
         # 初始化浏览器并登录
         log("🚀 初始化浏览器管理器...")
-        if not browser_manager.initialize(playwright, username, password, system_language, login_url=login_url):
+        if not browser_manager.initialize(playwright, username, password, system_language, 
+                                         login_url=login_url, browser_path=browser_path, 
+                                         preferred_browser=preferred_browser):
             log("❌ 浏览器初始化失败，终止处理", "ERROR")
             return {
                 'total': total_count,
