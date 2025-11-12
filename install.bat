@@ -153,45 +153,74 @@ echo.
 echo [STEP 5/6 COMPLETED] Playwright browsers installed successfully!
 echo.
 
-REM Create desktop shortcut for GUI version
+REM Create shortcuts for GUI version
 echo ========================================
-echo [6/6] Creating desktop shortcut...
+echo [6/6] Creating shortcuts...
 echo ========================================
 echo.
 set SCRIPT_DIR=%~dp0
 set SCRIPT_DIR=%SCRIPT_DIR:~0,-1%
 
-REM Create VBScript to generate shortcut
+REM Create shortcut in project directory (always works)
+echo Creating shortcut in project directory...
+echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
+echo sLinkFile = "%SCRIPT_DIR%\启动 PEDA V12.lnk" >> CreateShortcut.vbs
+echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
+echo oLink.TargetPath = "%SCRIPT_DIR%\run_gui.bat" >> CreateShortcut.vbs
+echo oLink.WorkingDirectory = "%SCRIPT_DIR%" >> CreateShortcut.vbs
+echo oLink.Description = "PEDA V12 Document Management System" >> CreateShortcut.vbs
+if exist "%SCRIPT_DIR%\icon.ico" (
+    echo oLink.IconLocation = "%SCRIPT_DIR%\icon.ico" >> CreateShortcut.vbs
+)
+echo oLink.Save >> CreateShortcut.vbs
+
+cscript //nologo CreateShortcut.vbs >nul 2>&1
+
+if exist "%SCRIPT_DIR%\启动 PEDA V12.lnk" (
+    echo [OK] Project directory shortcut created: "启动 PEDA V12.lnk"
+) else (
+    echo [WARNING] Failed to create project directory shortcut
+)
+
+REM Try to create desktop shortcut
+echo.
+echo Creating desktop shortcut...
 echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
 echo sLinkFile = oWS.SpecialFolders("Desktop") ^& "\PEDA V12.lnk" >> CreateShortcut.vbs
 echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
 echo oLink.TargetPath = "%SCRIPT_DIR%\run_gui.bat" >> CreateShortcut.vbs
 echo oLink.WorkingDirectory = "%SCRIPT_DIR%" >> CreateShortcut.vbs
 echo oLink.Description = "PEDA V12 Document Management System" >> CreateShortcut.vbs
-echo oLink.IconLocation = "%SCRIPT_DIR%\icon.ico" >> CreateShortcut.vbs
+if exist "%SCRIPT_DIR%\icon.ico" (
+    echo oLink.IconLocation = "%SCRIPT_DIR%\icon.ico" >> CreateShortcut.vbs
+)
 echo oLink.Save >> CreateShortcut.vbs
 
-REM Execute VBScript
-cscript //nologo CreateShortcut.vbs
+cscript //nologo CreateShortcut.vbs >nul 2>&1
 del CreateShortcut.vbs
 
 if exist "%USERPROFILE%\Desktop\PEDA V12.lnk" (
-    echo Desktop shortcut created successfully!
+    echo [OK] Desktop shortcut created successfully!
 ) else (
-    echo Warning: Failed to create desktop shortcut
+    echo [WARNING] Failed to create desktop shortcut
+    echo          You can use the shortcut in the project directory instead
 )
 
 echo.
-echo [STEP 6/6 COMPLETED] Desktop shortcut created!
+echo [STEP 6/6 COMPLETED] Shortcuts created!
 echo.
 echo ========================================
 echo ALL STEPS COMPLETED SUCCESSFULLY!
 echo ========================================
 echo.
-echo You can now run the application by:
-echo   1. Double-clicking "PEDA V12" on your desktop
-echo   2. Running run_gui.bat for GUI version
-echo   3. Running run_cli.bat for CLI version
+echo Installation complete! You can now run the application by:
+echo.
+echo   [Recommended] Double-click "启动 PEDA V12.lnk" in this folder
+echo   [Alternative] Double-click "PEDA V12" on your desktop (if created)
+echo   [Manual]      Run run_gui.bat for GUI version
+echo   [Manual]      Run run_cli.bat for CLI version
+echo.
+echo ========================================
 echo.
 
 pause

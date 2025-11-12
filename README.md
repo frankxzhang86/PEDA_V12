@@ -10,7 +10,8 @@ PEDA自动化处理工具V12是一款基于Python和Playwright的批量表单自
    - 升级 pip 到最新版本
    - 安装所有Python依赖包
    - 安装 Playwright 浏览器（Chromium, Firefox, WebKit）
-   - 创建桌面快捷方式
+   - 在项目目录创建快捷方式 "启动 PEDA V12.lnk"
+   - 尝试在桌面创建快捷方式 "PEDA V12.lnk"
 
 ## 手动安装
 1. 安装Python 3.8及以上版本
@@ -33,7 +34,8 @@ PEDA自动化处理工具V12是一款基于Python和Playwright的批量表单自
 ## 启动程序
 
 ### Windows 用户（推荐）
-- **双击桌面快捷方式** "PEDA V12"
+- **双击项目目录中的快捷方式** "启动 PEDA V12.lnk"（推荐，始终可用）
+- 或双击桌面快捷方式 "PEDA V12"（如果已创建）
 - 或双击运行 `run_gui.bat`（GUI界面）
 - 或双击运行 `run_cli.bat`（命令行界面）
 

@@ -87,5 +87,8 @@ start.cpython-*.pyc
 # Gemini 临时文件
 .gemini-clipboard/
 
+# Windows shortcuts
+*.lnk
+
 # 说明：如有其它不希望打包的临时或个人文件，可继续补充
 auto_form_fill_2.py
