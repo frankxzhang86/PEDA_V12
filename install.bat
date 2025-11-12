@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 REM PEDA V12 Windows Installation Script
 REM This script installs Python dependencies and sets up Playwright browsers in a virtual environment
 
@@ -158,52 +159,54 @@ echo ========================================
 echo [6/6] Creating shortcuts...
 echo ========================================
 echo.
-set SCRIPT_DIR=%~dp0
-set SCRIPT_DIR=%SCRIPT_DIR:~0,-1%
+set "SCRIPT_DIR=%~dp0"
+set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
+set "SHORTCUT_TARGET=%SCRIPT_DIR%\run_gui.bat"
+set "SHORTCUT_DESCRIPTION=PEDA V12 Document Management System"
+set "SHORTCUT_ICON="
+if exist "%SCRIPT_DIR%\icon.ico" (
+    set "SHORTCUT_ICON=%SCRIPT_DIR%\icon.ico"
+)
 
 REM Create shortcut in project directory (always works)
+set "PROJECT_SHORTCUT=%SCRIPT_DIR%\启动 PEDA V12.lnk"
 echo Creating shortcut in project directory...
-echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
-echo sLinkFile = "%SCRIPT_DIR%\启动 PEDA V12.lnk" >> CreateShortcut.vbs
-echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
-echo oLink.TargetPath = "%SCRIPT_DIR%\run_gui.bat" >> CreateShortcut.vbs
-echo oLink.WorkingDirectory = "%SCRIPT_DIR%" >> CreateShortcut.vbs
-echo oLink.Description = "PEDA V12 Document Management System" >> CreateShortcut.vbs
-if exist "%SCRIPT_DIR%\icon.ico" (
-    echo oLink.IconLocation = "%SCRIPT_DIR%\icon.ico" >> CreateShortcut.vbs
-)
-echo oLink.Save >> CreateShortcut.vbs
+call :CreateShortcut "%PROJECT_SHORTCUT%" "%SHORTCUT_TARGET%" "%SCRIPT_DIR%" "%SHORTCUT_DESCRIPTION%" "%SHORTCUT_ICON%"
 
-cscript //nologo CreateShortcut.vbs >nul 2>&1
-
-if exist "%SCRIPT_DIR%\启动 PEDA V12.lnk" (
+if exist "%PROJECT_SHORTCUT%" (
     echo [OK] Project directory shortcut created: "启动 PEDA V12.lnk"
 ) else (
     echo [WARNING] Failed to create project directory shortcut
 )
 
-REM Try to create desktop shortcut
+REM Determine candidate desktop paths (handles Desktop redirection/OneDrive)
+set "PRIMARY_DESKTOP="
+for /f "delims=" %%D in ('powershell -NoProfile -Command "[Environment]::GetFolderPath(^"Desktop^")"') do (
+    if not defined PRIMARY_DESKTOP set "PRIMARY_DESKTOP=%%D"
+)
+
+set "COMMON_DESKTOP="
+for /f "delims=" %%D in ('powershell -NoProfile -Command "[Environment]::GetFolderPath(^"CommonDesktopDirectory^")"') do (
+    if not defined COMMON_DESKTOP set "COMMON_DESKTOP=%%D"
+)
+
 echo.
 echo Creating desktop shortcut...
-echo Set oWS = WScript.CreateObject("WScript.Shell") > CreateShortcut.vbs
-echo sLinkFile = oWS.SpecialFolders("Desktop") ^& "\PEDA V12.lnk" >> CreateShortcut.vbs
-echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
-echo oLink.TargetPath = "%SCRIPT_DIR%\run_gui.bat" >> CreateShortcut.vbs
-echo oLink.WorkingDirectory = "%SCRIPT_DIR%" >> CreateShortcut.vbs
-echo oLink.Description = "PEDA V12 Document Management System" >> CreateShortcut.vbs
-if exist "%SCRIPT_DIR%\icon.ico" (
-    echo oLink.IconLocation = "%SCRIPT_DIR%\icon.ico" >> CreateShortcut.vbs
-)
-echo oLink.Save >> CreateShortcut.vbs
+set "DESKTOP_SHORTCUT_DONE="
+call :TryDesktopShortcut "%PRIMARY_DESKTOP%"
+call :TryDesktopShortcut "%USERPROFILE%\Desktop"
+call :TryDesktopShortcut "%HOMEDRIVE%%HOMEPATH%\Desktop"
+if defined OneDrive call :TryDesktopShortcut "%OneDrive%\Desktop"
+if defined OneDriveConsumer call :TryDesktopShortcut "%OneDriveConsumer%\Desktop"
+if defined COMMON_DESKTOP call :TryDesktopShortcut "%COMMON_DESKTOP%"
+if defined PUBLIC call :TryDesktopShortcut "%PUBLIC%\Desktop"
 
-cscript //nologo CreateShortcut.vbs >nul 2>&1
-del CreateShortcut.vbs
-
-if exist "%USERPROFILE%\Desktop\PEDA V12.lnk" (
+if defined DESKTOP_SHORTCUT_DONE (
     echo [OK] Desktop shortcut created successfully!
+    echo      Location: %DESKTOP_SHORTCUT_DONE%
 ) else (
     echo [WARNING] Failed to create desktop shortcut
-    echo          You can use the shortcut in the project directory instead
+    echo          You can copy "启动 PEDA V12.lnk" to your desktop manually if it is redirected or locked
 )
 
 echo.
@@ -224,3 +227,47 @@ echo ========================================
 echo.
 
 pause
+goto :EOF
+
+:CreateShortcut
+set "CS_SHORTCUT_PATH=%~1"
+set "CS_SHORTCUT_TARGET=%~2"
+set "CS_SHORTCUT_WORKDIR=%~3"
+set "CS_SHORTCUT_DESC=%~4"
+set "CS_SHORTCUT_ICON=%~5"
+
+if "%CS_SHORTCUT_PATH%"=="" exit /b 1
+if "%CS_SHORTCUT_TARGET%"=="" exit /b 1
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "$shell = New-Object -ComObject WScript.Shell; " ^
+    "$shortcut = $shell.CreateShortcut($env:CS_SHORTCUT_PATH); " ^
+    "$shortcut.TargetPath = $env:CS_SHORTCUT_TARGET; " ^
+    "if ($env:CS_SHORTCUT_WORKDIR) { $shortcut.WorkingDirectory = $env:CS_SHORTCUT_WORKDIR }; " ^
+    "if ($env:CS_SHORTCUT_DESC) { $shortcut.Description = $env:CS_SHORTCUT_DESC }; " ^
+    "$iconPath = $env:CS_SHORTCUT_ICON; " ^
+    "if ($iconPath -and (Test-Path $iconPath)) { $shortcut.IconLocation = $iconPath }; " ^
+    "$shortcut.Save()" >nul 2>&1
+
+set "LAST_SHORTCUT_ERROR=%errorlevel%"
+set CS_SHORTCUT_PATH=
+set CS_SHORTCUT_TARGET=
+set CS_SHORTCUT_WORKDIR=
+set CS_SHORTCUT_DESC=
+set CS_SHORTCUT_ICON=
+exit /b %LAST_SHORTCUT_ERROR%
+
+:TryDesktopShortcut
+if defined DESKTOP_SHORTCUT_DONE exit /b
+set "TARGET_FOLDER=%~1"
+if "%TARGET_FOLDER%"=="" exit /b
+if not exist "%TARGET_FOLDER%" exit /b
+
+if "%TARGET_FOLDER:~-1%"=="\" set "TARGET_FOLDER=%TARGET_FOLDER:~0,-1%"
+
+set "CURRENT_DESKTOP_LINK=%TARGET_FOLDER%\PEDA V12.lnk"
+call :CreateShortcut "%CURRENT_DESKTOP_LINK%" "%SHORTCUT_TARGET%" "%SCRIPT_DIR%" "%SHORTCUT_DESCRIPTION%" "%SHORTCUT_ICON%"
+if exist "%CURRENT_DESKTOP_LINK%" (
+    set "DESKTOP_SHORTCUT_DONE=%CURRENT_DESKTOP_LINK%"
+)
+exit /b
