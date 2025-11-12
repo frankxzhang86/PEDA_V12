@@ -6,7 +6,7 @@
 def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, password: str, 
                           system_language: str = 'en', progress_callback=None, log_callback=None, 
                           upload_record_callback=None, login_url=None, 
-                          browser_path=None, preferred_browser="auto"):
+                          browser_path=None, preferred_browser="auto", browser_finder=None):
     print(f"[DEBUG] run_with_gui_params_v2 called with excel_path={excel_path}, document_path={document_path}, username={username}, password={password}, system_language={system_language}, login_url={login_url}, browser_path={browser_path}, preferred_browser={preferred_browser}")
     """
     从GUI调用的主要处理函数（浏览器复用版本）
@@ -23,6 +23,7 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
         login_url: 登录页面URL
         browser_path: 自定义浏览器路径（可选）
         preferred_browser: 首选浏览器类型 ("chrome", "msedge", "auto")
+        browser_finder: 预热的浏览器查找器实例（可选，用于加速启动）
     """
     try:
         # 延迟导入，避免主GUI启动变慢
@@ -88,7 +89,8 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
                 upload_record_callback=upload_record_callback,
                 login_url=login_url,
                 browser_path=browser_path,
-                preferred_browser=preferred_browser
+                preferred_browser=preferred_browser,
+                browser_finder=browser_finder  # 传递预热的 browser_finder
             )
         print(f"[DEBUG] run_batch_with_reuse returned: {result}")
         

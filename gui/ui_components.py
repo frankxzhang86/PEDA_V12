@@ -98,10 +98,91 @@ class UIComponentManager:
         self.app.notebook.add(self.app.main_tab, text="Main")
         self.create_main_tab_content()
         
+        # 使用说明页面
+        self.app.instructions_tab = tk.Frame(self.app.notebook, bg=self.colors['white'])
+        self.app.notebook.add(self.app.instructions_tab, text="Instructions")
+        self.create_instructions_tab_content()
+        
         # 日志页面
         self.app.log_tab = tk.Frame(self.app.notebook, bg=self.colors['white'])
         self.app.notebook.add(self.app.log_tab, text="Logs")
         self.create_log_tab_content()
+
+    def create_instructions_tab_content(self):
+        """创建使用说明页面内容"""
+        # 创建一个带滚动条的框架
+        canvas = tk.Canvas(self.app.instructions_tab, bg=self.colors['white'], highlightthickness=0)
+        scrollbar = ttk.Scrollbar(self.app.instructions_tab, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg=self.colors['white'])
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        content_frame = tk.Frame(scrollable_frame, bg=self.colors['white'], padx=20, pady=20)
+        content_frame.pack(fill=tk.BOTH, expand=True)
+
+        # 1. 大标题
+        self.app.instructions_title_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_title'),
+                                   font=('微软雅黑', 16, 'bold'), bg=self.colors['white'],
+                                   fg=self.colors['dark'])
+        self.app.instructions_title_label.pack(anchor='w', pady=(0, 20))
+
+        # 2. 操作说明
+        self.app.op_title_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_op_title'),
+                                 font=('微软雅黑', 12, 'bold'), bg=self.colors['white'],
+                                 fg=self.colors['primary'])
+        self.app.op_title_label.pack(anchor='w', pady=(10, 5))
+
+        self.app.op_content_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_op_content'),
+                                   font=('微软雅黑', 10), bg=self.colors['white'],
+                                   wraplength=700, justify='left',
+                                   fg=self.colors['neutral_700'])
+        self.app.op_content_label.pack(anchor='w', pady=(0, 15))
+
+        # 3. 上传表格说明
+        self.app.excel_title_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_excel_title'),
+                                    font=('微软雅黑', 12, 'bold'), bg=self.colors['white'],
+                                    fg=self.colors['primary'])
+        self.app.excel_title_label.pack(anchor='w', pady=(10, 5))
+
+        self.app.excel_content_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_excel_content'),
+                                      font=('微软雅黑', 10), bg=self.colors['white'],
+                                      wraplength=700, justify='left',
+                                      fg=self.colors['neutral_700'])
+        self.app.excel_content_label.pack(anchor='w', pady=(0, 10))
+
+        self.app.download_template_btn = tk.Button(content_frame, text=get_text(self.app.current_language, 'instructions_download_template'),
+                                                 font=('微软雅黑', 10, 'bold'), bg=self.colors['success'],
+                                                 fg=self.colors['white'], relief='flat',
+                                                 padx=20, pady=8, cursor='hand2',
+                                                 command=self.app.download_template_file,
+                                                 activebackground=self.colors['success_light'])
+        self.app.download_template_btn.pack(anchor='w', pady=(5, 20))
+
+        # 4. 目录结构要求
+        self.app.dir_title_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_dir_title'),
+                                  font=('微软雅黑', 12, 'bold'), bg=self.colors['white'],
+                                  fg=self.colors['primary'])
+        self.app.dir_title_label.pack(anchor='w', pady=(10, 5))
+
+        # 使用Text控件来显示等宽字体内容
+        self.app.dir_content_text = tk.Text(content_frame, font=('Consolas', 10), bg=self.colors['white'],
+                                          fg=self.colors['dark'], relief='flat', borderwidth=0,
+                                          padx=10, pady=10, wrap='none', height=20)
+        dir_structure = get_text(self.app.current_language, 'instructions_dir_content').strip()
+        self.app.dir_content_text.insert(tk.END, dir_structure)
+        self.app.dir_content_text.config(state='disabled')
+        self.app.dir_content_text.pack(anchor='w', fill='x', pady=(0, 15))
         
     def create_main_tab_content(self):
         """创建主页面内容"""

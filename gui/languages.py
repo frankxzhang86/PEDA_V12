@@ -60,7 +60,38 @@ LANGUAGES = {
         'error_occurred': 'Error occurred during processing',
         'processing_exception': 'Exception occurred during processing',
         'save_login': '💾 Save',
-        'config_saved': 'Configuration saved'
+        'config_saved': 'Configuration saved',
+        'instructions_tab': 'Instructions',
+        'instructions_title': '📖 User Manual',
+        'instructions_op_title': '1. Operation Instructions',
+        'instructions_op_content': """
+1. Login: Enter the URL, username, and password, then click 'Save' to store the credentials.
+2. File Selection: Click 'Choose File' to select the Excel file and 'Choose Folder' to select the document directory.
+3. Start: Click 'Start' to begin the automated processing.
+4. Stop/Reset: 'Stop' halts the current process, and 'Reset' clears all progress and statistics.
+5. Reports: After processing, you can download various reports for records.
+""",
+        'instructions_excel_title': '2. Excel Upload Instructions',
+        'instructions_excel_content': """
+The Excel file must contain specific columns for the program to read correctly.
+Please download the template to see the required format.
+""",
+        'instructions_download_template': '📄 Download Template',
+        'instructions_dir_title': '3. Document Directory Structure Requirements',
+        'instructions_dir_content': """
+1. The document directory must follow a specific structure.
+2. Each sub-folder should be named with the 'Part Number' from the Excel file.
+3. Inside each 'Part Number' folder, create sub-folders for different document types as shown below:
+
+TEST/
+└───[Part Number]/
+    ├───Confidential/
+    ├───Image Documentation/
+    ├───Measurement Report/
+    ├───Other/
+    ├───Technical Datasheet/
+    └───Technical Drawing/
+"""
     },
     'de': {
         'title': 'PEDA Automatisierungstool v1.0',
@@ -117,7 +148,38 @@ LANGUAGES = {
         'error_occurred': 'Fehler während der Verarbeitung aufgetreten',
         'processing_exception': 'Fehler während der Verarbeitung aufgetreten',
         'save_login': '💾 Login speichern',
-        'config_saved': 'Konfiguration gespeichert'
+        'config_saved': 'Konfiguration gespeichert',
+        'instructions_tab': 'Anleitung',
+        'instructions_title': '📖 Benutzerhandbuch',
+        'instructions_op_title': '1. Bedienungsanleitung',
+        'instructions_op_content': """
+1. Anmelden: Geben Sie die URL, den Benutzernamen und das Passwort ein und klicken Sie auf "Speichern", um die Anmeldeinformationen zu sichern.
+2. Dateiauswahl: Klicken Sie auf "Datei wählen", um die Excel-Datei auszuwählen, und auf "Ordner wählen", um das Dokumentenverzeichnis auszuwählen.
+3. Start: Klicken Sie auf "Start", um die automatische Verarbeitung zu beginnen.
+4. Stopp/Zurücksetzen: "Stopp" hält den aktuellen Prozess an, und "Zurücksetzen" löscht den gesamten Fortschritt und die Statistiken.
+5. Berichte: Nach der Verarbeitung können Sie verschiedene Berichte für Ihre Unterlagen herunterladen.
+""",
+        'instructions_excel_title': '2. Anleitung zum Hochladen von Excel-Dateien',
+        'instructions_excel_content': """
+Die Excel-Datei muss bestimmte Spalten enthalten, damit das Programm sie korrekt lesen kann.
+Bitte laden Sie die Vorlage herunter, um das erforderliche Format zu sehen.
+""",
+        'instructions_download_template': '📄 Vorlage herunterladen',
+        'instructions_dir_title': '3. Anforderungen an die Dokumentenverzeichnisstruktur',
+        'instructions_dir_content': """
+1. Das Dokumentenverzeichnis muss einer bestimmten Struktur folgen.
+2. Jeder Unterordner sollte mit der 'Part Number' aus der Excel-Datei benannt sein.
+3. Innerhalb jedes 'Part Number'-Ordners erstellen Sie Unterordner für verschiedene Dokumenttypen, wie unten gezeigt:
+
+TEST/
+└───[Part Number]/
+    ├───Confidential/
+    ├───Image Documentation/
+    ├───Measurement Report/
+    ├───Other/
+    ├───Technical Datasheet/
+    └───Technical Drawing/
+"""
     },
     'zh': {
         'title': 'PEDA 自动化处理工具 v1.0',
@@ -174,7 +236,38 @@ LANGUAGES = {
         'error_occurred': '处理期间发生错误',
         'processing_exception': '处理期间发生异常',
         'save_login': '💾 登录信息保存',
-        'config_saved': '配置已保存'
+        'config_saved': '配置已保存',
+        'instructions_tab': '使用说明',
+        'instructions_title': '📖 使用手册',
+        'instructions_op_title': '1. 操作说明',
+        'instructions_op_content': """
+1. 登录：输入网址、用户名和密码，点击“保存”以存储凭据。
+2. 文件选择：点击“选择文件”选择Excel文件，点击“选择文件夹”选择文档目录。
+3. 开始：点击“开始”以启动自动化处理。
+4. 停止/重置：“停止”会暂停当前进程，“重置”会清除所有进度和统计信息。
+5. 报告：处理完成后，您可以下载各种报告以供记录。
+""",
+        'instructions_excel_title': '2. 上传表格说明',
+        'instructions_excel_content': """
+Excel文件必须包含特定列，以便程序正确读取。
+请下载模板以查看所需格式。
+""",
+        'instructions_download_template': '📄 下载模板',
+        'instructions_dir_title': '3. 上传文档的目录结构要求',
+        'instructions_dir_content': """
+1. 文档目录必须遵循特定的结构。
+2. 每个子文件夹都应以Excel文件中的“零件号”命名。
+3. 在每个“零件号”文件夹内，为不同的文档类型创建子文件夹，如下所示：
+
+TEST/
+└───[零件号]/
+    ├───Confidential/
+    ├───Image Documentation/
+    ├───Measurement Report/
+    ├───Other/
+    ├───Technical Datasheet/
+    └───Technical Drawing/
+"""
     }
 }
 

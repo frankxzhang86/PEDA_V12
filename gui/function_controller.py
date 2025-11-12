@@ -24,6 +24,8 @@ class FunctionController:
         # 预热标志，防止重复预热
         self._preload_started = False
         self._preload_lock = threading.Lock()
+        # 缓存浏览器查找器实例（用于预热和后续使用）
+        self._browser_finder = None
         
     # =================
     # 文件选择方法
@@ -191,7 +193,8 @@ class FunctionController:
                     upload_record_callback=self.add_upload_record,
                     login_url=login_url,
                     browser_path=browser_path,
-                    preferred_browser=preferred_browser
+                    preferred_browser=preferred_browser,
+                    browser_finder=self._browser_finder  # 传递预热的 browser_finder
                 )
                 print(f"[DEBUG] run_with_gui_params_v2 returned: {result}")
             else:
@@ -256,6 +259,24 @@ class FunctionController:
                     self.log_message("预热：playwright 导入完成", "INFO")
                 except Exception as e:
                     self.log_message(f"预热警告：playwright 导入失败或未安装: {e}", "WARNING")
+
+                # 预热浏览器查找（查找并缓存浏览器路径，不启动浏览器）
+                try:
+                    self.log_message("预热：开始查找浏览器路径...", "INFO")
+                    from modules.browser_finder import BrowserFinder
+                    
+                    # 创建浏览器查找器实例并缓存
+                    self._browser_finder = BrowserFinder(log_callback=self.log_message)
+                    
+                    # 执行查找（会自动缓存结果到 finder 内部）
+                    browser_path, browser_type = self._browser_finder.find_browser()
+                    
+                    if browser_path:
+                        self.log_message(f"预热：浏览器查找完成 - {browser_type}: {browser_path}", "INFO")
+                    else:
+                        self.log_message("预热警告：未找到可用浏览器，后续处理时将重新查找", "WARNING")
+                except Exception as e:
+                    self.log_message(f"预热警告：浏览器查找失败: {e}", "WARNING")
 
                 self.log_message("预热完成。", "INFO")
             except Exception as e:

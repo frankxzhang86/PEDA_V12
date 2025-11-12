@@ -68,6 +68,9 @@ class PEDAAutomationGUI:
             self.init_ui()
             self.load_config()
             self.start_log_monitor()
+            
+            # 延迟2秒后启动预热（给应用初始化时间）
+            self.root.after(2000, self.delayed_preload)
         except Exception as e:
             print("[EXCEPTION] PEDAAutomationGUI.__init__:", e)
             import traceback
@@ -77,6 +80,14 @@ class PEDAAutomationGUI:
     def start_log_monitor(self):
         """启动日志监控"""
         pass
+    
+    def delayed_preload(self):
+        """延迟启动预热"""
+        try:
+            self.log_message("开始后台预热...", "INFO")
+            self.function_controller.start_preload()
+        except Exception as e:
+            self.log_message(f"预热启动失败（不影响使用）: {e}", "WARNING")
         
     def setup_variables(self):
         """设置界面变量"""
@@ -255,6 +266,31 @@ class PEDAAutomationGUI:
 
     def download_upload_record(self):
         return self.function_controller.download_upload_record()
+
+    def download_template_file(self):
+        """下载Excel模板文件"""
+        try:
+            # 获取当前脚本所在的绝对路径
+            source_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'TEST', 'PEDA_Upload_Template.xlsx'))
+            
+            if not os.path.exists(source_path):
+                messagebox.showerror("错误", "模板文件 'TEST/PEDA_Upload_Template.xlsx' 不存在。")
+                return
+
+            # 弹出文件保存对话框
+            dest_path = filedialog.asksaveasfilename(
+                defaultextension=".xlsx",
+                filetypes=[("Excel files", "*.xlsx")],
+                initialfile="PEDA_Upload_Template.xlsx",
+                title="保存模板文件"
+            )
+
+            if dest_path:
+                import shutil
+                shutil.copy(source_path, dest_path)
+                messagebox.showinfo("成功", f"模板文件已成功保存到:\n{dest_path}")
+        except Exception as e:
+            messagebox.showerror("错误", f"下载模板文件失败: {e}")
     
     # 语言切换方法
     def switch_language(self, lang):
@@ -304,7 +340,28 @@ class PEDAAutomationGUI:
             # 标签页
             if hasattr(self, 'notebook'):
                 self.notebook.tab(0, text=texts['main_tab'])
-                self.notebook.tab(1, text=texts['logs_tab'])
+                self.notebook.tab(1, text=texts.get('instructions_tab', 'Instructions'))
+                self.notebook.tab(2, text=texts['logs_tab'])
+            # 使用说明页面
+            if hasattr(self, 'instructions_title_label'):
+                self.instructions_title_label.config(text=texts.get('instructions_title', 'User Manual'))
+            if hasattr(self, 'op_title_label'):
+                self.op_title_label.config(text=texts.get('instructions_op_title', '1. Operation Instructions'))
+            if hasattr(self, 'op_content_label'):
+                self.op_content_label.config(text=texts.get('instructions_op_content', ''))
+            if hasattr(self, 'excel_title_label'):
+                self.excel_title_label.config(text=texts.get('instructions_excel_title', '2. Excel Upload Instructions'))
+            if hasattr(self, 'excel_content_label'):
+                self.excel_content_label.config(text=texts.get('instructions_excel_content', ''))
+            if hasattr(self, 'download_template_btn'):
+                self.download_template_btn.config(text=texts.get('instructions_download_template', 'Download Template'))
+            if hasattr(self, 'dir_title_label'):
+                self.dir_title_label.config(text=texts.get('instructions_dir_title', '3. Document Directory Structure Requirements'))
+            if hasattr(self, 'dir_content_text'):
+                self.dir_content_text.config(state='normal')
+                self.dir_content_text.delete('1.0', tk.END)
+                self.dir_content_text.insert('1.0', texts.get('instructions_dir_content', '').strip())
+                self.dir_content_text.config(state='disabled')
             # 登录区
             if hasattr(self, 'login_url_label'):
                 self.login_url_label.config(text=texts.get('login_url', '登录网址'))

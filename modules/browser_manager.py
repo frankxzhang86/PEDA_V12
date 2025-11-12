@@ -45,7 +45,8 @@ class BrowserManager:
     
     def initialize(self, playwright: Playwright, username: str, password: str, 
                    system_language: str = 'en', login_url: Optional[str] = None,
-                   browser_path: Optional[str] = None, preferred_browser: str = "auto") -> bool:
+                   browser_path: Optional[str] = None, preferred_browser: str = "auto",
+                   browser_finder: Optional[BrowserFinder] = None) -> bool:
         """
         初始化浏览器并登录
         
@@ -57,6 +58,7 @@ class BrowserManager:
             login_url: 登录网址
             browser_path: 自定义浏览器路径（可选）
             preferred_browser: 首选浏览器类型 ("chrome", "msedge", "auto")
+            browser_finder: 预热的浏览器查找器实例（可选，用于加速启动）
             
         Returns:
             bool: 初始化成功返回True
@@ -75,10 +77,15 @@ class BrowserManager:
                 self.log("⚠️ 未提供登录URL，使用默认URL", "WARNING")
             self.login_url = login_url
             
-            # 初始化浏览器查找器
-            self.browser_finder = BrowserFinder(log_callback=self.log_callback)
+            # 使用预热的浏览器查找器或创建新的
+            if browser_finder:
+                self.log("使用预热的浏览器查找器...")
+                self.browser_finder = browser_finder
+            else:
+                # 初始化浏览器查找器
+                self.browser_finder = BrowserFinder(log_callback=self.log_callback)
             
-            # 查找浏览器
+            # 查找浏览器（如果已预热，会直接返回缓存结果）
             self.browser_path, self.browser_type = self.browser_finder.find_browser(
                 preferred_browser=preferred_browser,
                 custom_path=browser_path
