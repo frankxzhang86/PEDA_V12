@@ -1,6 +1,6 @@
 @echo off
 REM PEDA V12 Windows Installation Script
-REM This script installs Python dependencies and sets up Playwright browsers
+REM This script installs Python dependencies and sets up Playwright browsers in a virtual environment
 
 REM Ensure script runs in its own directory
 cd /d %~dp0
@@ -10,11 +10,12 @@ echo PEDA V12 Installation Script
 echo ========================================
 echo.
 echo This script will:
-echo   [1/5] Verify Python environment
-echo   [2/5] Upgrade pip package manager
-echo   [3/5] Install Python dependencies
-echo   [4/5] Install Playwright browsers
-echo   [5/5] Create desktop shortcut
+echo   [1/6] Verify Python environment
+echo   [2/6] Create virtual environment
+echo   [3/6] Upgrade pip package manager
+echo   [4/6] Install Python dependencies
+echo   [5/6] Install Playwright browsers
+echo   [6/6] Create desktop shortcut
 echo.
 echo ========================================
 echo.
@@ -66,12 +67,43 @@ if errorlevel 1 (
 echo pip found:
 python -m pip --version
 echo.
-echo [STEP 1/5 COMPLETED] Python environment verified successfully!
+echo [STEP 1/6 COMPLETED] Python environment verified successfully!
+echo.
+
+REM Create or verify virtual environment
+echo ========================================
+echo [2/6] Setting up virtual environment...
+echo ========================================
+echo.
+
+if exist "venv\Scripts\activate.bat" (
+    echo Virtual environment already exists, skipping creation...
+) else (
+    echo Creating new virtual environment...
+    python -m venv venv
+    if errorlevel 1 (
+        echo ERROR: Failed to create virtual environment
+        pause
+        exit /b 1
+    )
+    echo Virtual environment created successfully!
+)
+
+echo Activating virtual environment...
+call venv\Scripts\activate.bat
+if errorlevel 1 (
+    echo ERROR: Failed to activate virtual environment
+    pause
+    exit /b 1
+)
+
+echo.
+echo [STEP 2/6 COMPLETED] Virtual environment is ready!
 echo.
 
 REM Upgrade pip to latest version
 echo ========================================
-echo [2/5] Upgrading pip package manager...
+echo [3/6] Upgrading pip package manager...
 echo ========================================
 echo.
 python -m pip install --upgrade pip
@@ -79,12 +111,12 @@ if errorlevel 1 (
     echo WARNING: Failed to upgrade pip, continuing anyway...
 )
 echo.
-echo [STEP 2/5 COMPLETED] pip upgraded successfully!
+echo [STEP 3/6 COMPLETED] pip upgraded successfully!
 echo.
 
 REM Install Python dependencies from requirements.txt
 echo ========================================
-echo [3/5] Installing Python dependencies...
+echo [4/6] Installing Python dependencies...
 echo ========================================
 echo This may take several minutes, please wait...
 echo.
@@ -98,12 +130,12 @@ if errorlevel 1 (
 )
 
 echo.
-echo [STEP 3/5 COMPLETED] Python dependencies installed successfully!
+echo [STEP 4/6 COMPLETED] Python dependencies installed successfully!
 echo.
 
 REM Install Playwright browsers
 echo ========================================
-echo [4/5] Installing Playwright browsers...
+echo [5/6] Installing Playwright browsers...
 echo ========================================
 echo This will download Chromium, Firefox, and WebKit
 echo This may take several minutes depending on your internet speed...
@@ -118,12 +150,12 @@ if errorlevel 1 (
 )
 
 echo.
-echo [STEP 4/5 COMPLETED] Playwright browsers installed successfully!
+echo [STEP 5/6 COMPLETED] Playwright browsers installed successfully!
 echo.
 
 REM Create desktop shortcut for GUI version
 echo ========================================
-echo [5/5] Creating desktop shortcut...
+echo [6/6] Creating desktop shortcut...
 echo ========================================
 echo.
 set SCRIPT_DIR=%~dp0
@@ -136,6 +168,7 @@ echo Set oLink = oWS.CreateShortcut(sLinkFile) >> CreateShortcut.vbs
 echo oLink.TargetPath = "%SCRIPT_DIR%\run_gui.bat" >> CreateShortcut.vbs
 echo oLink.WorkingDirectory = "%SCRIPT_DIR%" >> CreateShortcut.vbs
 echo oLink.Description = "PEDA V12 Document Management System" >> CreateShortcut.vbs
+echo oLink.IconLocation = "%SCRIPT_DIR%\icon.ico" >> CreateShortcut.vbs
 echo oLink.Save >> CreateShortcut.vbs
 
 REM Execute VBScript
@@ -149,7 +182,7 @@ if exist "%USERPROFILE%\Desktop\PEDA V12.lnk" (
 )
 
 echo.
-echo [STEP 5/5 COMPLETED] Desktop shortcut created!
+echo [STEP 6/6 COMPLETED] Desktop shortcut created!
 echo.
 echo ========================================
 echo ALL STEPS COMPLETED SUCCESSFULLY!

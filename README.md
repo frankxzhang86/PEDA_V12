@@ -6,21 +6,44 @@ PEDA自动化处理工具V12是一款基于Python和Playwright的批量表单自
 ## 快速安装（Windows用户推荐）
 1. 确保已安装 Python 3.8 或更高版本
 2. 双击运行 `install.bat` 脚本，将自动完成：
+   - **自动创建虚拟环境** (venv)
    - 升级 pip 到最新版本
    - 安装所有Python依赖包
    - 安装 Playwright 浏览器（Chromium, Firefox, WebKit）
+   - 创建桌面快捷方式
 
 ## 手动安装
 1. 安装Python 3.8及以上版本
-2. 安装依赖：
+2. 创建并激活虚拟环境：
+   ```bash
+   # Windows
+   python -m venv venv
+   venv\Scripts\activate
+   
+   # macOS/Linux
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+3. 安装依赖：
    ```bash
    pip install -r requirements.txt
    playwright install
    ```
 
 ## 启动程序
+
+### Windows 用户（推荐）
+- **双击桌面快捷方式** "PEDA V12"
+- 或双击运行 `run_gui.bat`（GUI界面）
+- 或双击运行 `run_cli.bat`（命令行界面）
+
+### 手动启动
 - **GUI界面启动**（推荐）：
   ```bash
+  # 先激活虚拟环境
+  # Windows: venv\Scripts\activate
+  # macOS/Linux: source venv/bin/activate
+  
   python start.py
   ```
   或
