@@ -136,16 +136,16 @@ echo.
 
 REM Install Playwright browsers
 echo ========================================
-echo [5/6] Installing Playwright browsers...
+echo [5/6] Installing Playwright browser (Chromium only)...
 echo ========================================
-echo This will download Chromium, Firefox, and WebKit
-echo This may take several minutes depending on your internet speed...
+echo This will download Chromium (Chrome)
+echo This may take a few minutes depending on your internet speed...
 echo Please be patient...
 echo.
 
-python -m playwright install
+python -m playwright install chromium
 if errorlevel 1 (
-    echo ERROR: Failed to install Playwright browsers
+    echo ERROR: Failed to install Playwright browser
     pause
     exit /b 1
 )
