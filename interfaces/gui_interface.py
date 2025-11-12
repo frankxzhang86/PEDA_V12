@@ -28,8 +28,10 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
     try:
         # 延迟导入，避免主GUI启动变慢
         from playwright.sync_api import sync_playwright
-        from modules.data_processor import read_excel_data
+        from modules.data_processor import read_excel_data, validate_excel_data
         from core.workflow_engine import run_batch_with_reuse
+        from config.constants import REQUIRED_COLUMNS
+
         if log_callback:
             log_callback("=== PEDA 自动化处理开始（浏览器复用模式）===")
             log_callback(f"Excel文件: {excel_path}")
@@ -42,38 +44,31 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
             log_callback("正在读取Excel数据...")
         
         data = read_excel_data(excel_path)
-        print(f"[DEBUG] read_excel_data returned: {type(data)}")
-        if data is None:
-            print("[DEBUG] Excel数据读取失败，data is None")
-            if log_callback:
-                log_callback("错误: 无法读取Excel数据", "ERROR")
-            return False
-            
-        if data.empty:
-            print("[DEBUG] Excel数据为空，data.empty is True")
-            if log_callback:
-                log_callback("错误: Excel文件为空，没有数据可处理", "ERROR")
-            return False
         
-        # 验证必要的列是否存在
-        required_columns = ['part_number', 'contact', 'project_type', 'reason', 
-                          'sample_quantity', 'decision_region', 'decision_value', 
-                          'document_maintenance_path']
-        missing_columns = [col for col in required_columns if col not in data.columns]
+        # 验证数据
+        validation_result = validate_excel_data(data)
         
-        if missing_columns:
-            error_msg = f"Excel文件缺少必要的列: {missing_columns}"
+        if not validation_result['headers_valid']:
+            error_msg = f"Excel文件缺少必要的列: {validation_result['missing_columns']}"
             if log_callback:
                 log_callback(f"错误: {error_msg}", "ERROR")
-                log_callback(f"必需的列: {required_columns}", "ERROR")
-            return False
+                log_callback(f"必需的列: {REQUIRED_COLUMNS}", "ERROR")
+            return False # 或者返回更详细的错误信息
+
+        qualified_df = validation_result['qualified_df']
         
-        total_rows = len(data)
+        if qualified_df.empty:
+            if log_callback:
+                log_callback("错误: Excel文件中没有合格的数据行可处理", "ERROR")
+                log_callback(f"总共 {validation_result['total_rows']} 行，合格 {validation_result['qualified_rows_count']} 行。", "INFO")
+            return False
+
+        total_rows = len(qualified_df)
         if log_callback:
-            log_callback(f"Excel数据验证通过，共 {total_rows} 行数据")
+            log_callback(f"Excel数据验证通过，共 {total_rows} 行合格数据待处理")
         
         # 转换DataFrame为字典列表
-        data_rows = data.to_dict('records')
+        data_rows = qualified_df.to_dict('records')
         
         # 调用批量处理函数（浏览器复用）
         print("[DEBUG] about to call run_batch_with_reuse")
@@ -81,6 +76,7 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
             result = run_batch_with_reuse(
                 playwright=playwright,
                 data_rows=data_rows,
+                document_path=document_path,  # 传递文档路径
                 username=username,
                 password=password,
                 system_language=system_language,
@@ -136,8 +132,10 @@ def run_with_gui_params(excel_path: str, document_path: str, username: str, pass
     try:
         # 延迟导入，避免主GUI启动变慢
         from playwright.sync_api import sync_playwright
-        from modules.data_processor import read_excel_data
+        from modules.data_processor import read_excel_data, validate_excel_data
         from core.workflow_engine import run
+        from config.constants import REQUIRED_COLUMNS
+
         if log_callback:
             log_callback("=== PEDA 自动化处理开始 ===")
             log_callback(f"Excel文件: {excel_path}")
@@ -150,39 +148,35 @@ def run_with_gui_params(excel_path: str, document_path: str, username: str, pass
             log_callback("正在读取Excel数据...")
         
         data = read_excel_data(excel_path)
-        if data is None:
-            if log_callback:
-                log_callback("错误: 无法读取Excel数据", "ERROR")
-            return False
-            
-        if data.empty:
-            if log_callback:
-                log_callback("错误: Excel文件为空，没有数据可处理", "ERROR")
-            return False
         
-        # 验证必要的列是否存在
-        required_columns = ['part_number', 'contact', 'project_type', 'reason', 
-                          'sample_quantity', 'decision_region', 'decision_value', 
-                          'document_maintenance_path']
-        missing_columns = [col for col in required_columns if col not in data.columns]
-        
-        if missing_columns:
-            error_msg = f"Excel文件缺少必要的列: {missing_columns}"
+        # 验证数据
+        validation_result = validate_excel_data(data)
+
+        if not validation_result['headers_valid']:
+            error_msg = f"Excel文件缺少必要的列: {validation_result['missing_columns']}"
             if log_callback:
                 log_callback(f"错误: {error_msg}", "ERROR")
-                log_callback(f"必需的列: {required_columns}", "ERROR")
+                log_callback(f"必需的列: {REQUIRED_COLUMNS}", "ERROR")
             return False
-        
-        total_rows = len(data)
+
+        qualified_df = validation_result['qualified_df']
+
+        if qualified_df.empty:
+            if log_callback:
+                log_callback("错误: Excel文件中没有合格的数据行可处理", "ERROR")
+                log_callback(f"总共 {validation_result['total_rows']} 行，合格 {validation_result['qualified_rows_count']} 行。", "INFO")
+            return False
+
+        total_rows = len(qualified_df)
         if log_callback:
-            log_callback(f"Excel数据验证通过，共 {total_rows} 行数据")
+            log_callback(f"Excel数据验证通过，共 {total_rows} 行合格数据待处理")
         
         success_count = 0
         failed_count = 0
         
         # 遍历每行数据执行操作
         with sync_playwright() as playwright:
-            for index, row in data.iterrows():
+            for index, row in qualified_df.iterrows():
                 current_part = row['part_number']
                 
                 if log_callback:

@@ -4,6 +4,7 @@ PEDA自动化处理工具 - 功能控制模块
 """
 
 import threading
+import os
 from datetime import datetime
 from tkinter import messagebox, filedialog
 from .languages import get_text, LANGUAGES
@@ -26,29 +27,127 @@ class FunctionController:
         self._preload_lock = threading.Lock()
         # 缓存浏览器查找器实例（用于预热和后续使用）
         self._browser_finder = None
+        # 新增：用于存储合格的件号列表
+        self.qualified_part_numbers = []
         
     # =================
     # 文件选择方法
     # =================
     
     def choose_excel_file(self):
-        """选择Excel文件"""
+        """选择Excel文件并立即进行验证"""
         file_path = self.app.file_manager.choose_excel_file()
-        if file_path:
-            self.app.excel_file_var.set(file_path)
-            # 在用户选择了Excel文件后，后台预热重量级模块（pandas, playwright）
-            try:
-                self.start_preload()
-            except Exception:
-                # 预热失败不影响功能
-                pass
+        if not file_path:
+            return
+
+        self.app.excel_file_var.set(file_path)
+        self.log_message(f"选择了Excel文件: {os.path.basename(file_path)}", "INFO")
+
+        # 清空旧数据
+        self.qualified_part_numbers = []
+        self.app.total_parts_var.set("")
+        self.app.qualified_parts_var.set("")
+
+        try:
+            # 延迟导入以保持UI响应
+            from modules.data_processor import read_excel_data, validate_excel_data
+
+            self.log_message("正在读取和验证Excel数据...", "INFO")
+            data = read_excel_data(file_path)
+            validation_result = validate_excel_data(data)
+
+            if not validation_result['headers_valid']:
+                missing_cols = ", ".join(validation_result['missing_columns'])
+                self.log_message(f"Excel表头验证失败，缺少列: {missing_cols}", "ERROR")
+                messagebox.showerror("Excel错误", f"文件缺少必需的列: {missing_cols}")
+                self._update_generate_button_state()
+                return
+
+            total_rows = validation_result['total_rows']
+            qualified_rows = validation_result['qualified_rows_count']
+            
+            self.app.total_parts_var.set(f"总行数: {total_rows}")
+            self.app.qualified_parts_var.set(f"合格行数: {qualified_rows}")
+
+            if qualified_rows > 0:
+                self.qualified_part_numbers = validation_result['qualified_df']['part_number'].astype(str).tolist()
+                self.log_message(f"验证完成: {total_rows}行数据中，有{qualified_rows}行合格。", "SUCCESS")
+            else:
+                self.log_message("验证完成，但没有找到合格的数据行。", "WARNING")
+
+        except Exception as e:
+            self.log_message(f"处理Excel文件时出错: {e}", "ERROR")
+            messagebox.showerror("处理失败", f"读取或验证Excel文件时发生错误:\n{e}")
+        
+        finally:
+            self._update_generate_button_state()
+            # 预热
+            self.start_preload()
+
             
     def choose_document_folder(self):
         """选择文档文件夹"""
         folder_path = self.app.file_manager.choose_document_folder()
         if folder_path:
             self.app.document_path_var.set(folder_path)
-    
+            self._update_generate_button_state()
+
+    def _update_generate_button_state(self):
+        """根据条件更新“生成文件夹”按钮的状态"""
+        doc_path_exists = self.app.document_path_var.get().strip()
+        has_qualified_parts = self.qualified_part_numbers
+        
+        if doc_path_exists and has_qualified_parts:
+            self.app.generate_folder_btn.config(state='normal')
+        else:
+            self.app.generate_folder_btn.config(state='disabled')
+
+    def generate_upload_folders(self):
+        """根据合格的件号列表生成上传文件夹"""
+        if not self.qualified_part_numbers:
+            messagebox.showwarning("无数据", "没有合格的件号用于创建文件夹。")
+            return
+
+        target_dir = self.app.document_path_var.get().strip()
+        if not target_dir or not os.path.isdir(target_dir):
+            messagebox.showerror("路径无效", "请先选择一个有效的目标文件夹。")
+            return
+
+        self.log_message(f"开始在 '{target_dir}' 中创建文件夹...", "INFO")
+        
+        created_count = 0
+        skipped_count = 0
+        error_count = 0
+        
+        try:
+            for part_number in self.qualified_part_numbers:
+                # 清理件号，防止创建无效的文件夹名
+                safe_part_number = str(part_number).strip().replace('/', '_').replace('\\', '_')
+                if not safe_part_number:
+                    skipped_count += 1
+                    continue
+                
+                folder_path = os.path.join(target_dir, safe_part_number)
+                
+                try:
+                    if not os.path.exists(folder_path):
+                        os.makedirs(folder_path)
+                        created_count += 1
+                    else:
+                        skipped_count += 1
+                except Exception as e:
+                    self.log_message(f"创建文件夹 '{folder_path}' 失败: {e}", "ERROR")
+                    error_count += 1
+            
+            summary_message = f"文件夹创建完成。\n\n成功创建: {created_count}\n已存在/跳过: {skipped_count}\n失败: {error_count}"
+            self.log_message(summary_message, "SUCCESS")
+            messagebox.showinfo("操作完成", summary_message)
+
+        except Exception as e:
+            error_msg = f"创建文件夹过程中发生意外错误: {e}"
+            self.log_message(error_msg, "ERROR")
+            messagebox.showerror("严重错误", error_msg)
+
     # =================
     # 处理控制方法
     # =================

@@ -102,6 +102,8 @@ class PEDAAutomationGUI:
         self.progress_var = tk.DoubleVar()
         self.current_status_var = tk.StringVar(value='Ready')
         self.login_url_var = tk.StringVar()  # 登录网址变量
+        self.total_parts_var = tk.StringVar(value='')
+        self.qualified_parts_var = tk.StringVar(value='')
         
     def setup_styles(self):
         """设置现代化样式"""

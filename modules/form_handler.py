@@ -414,22 +414,12 @@ def save_and_validate_peda(page, part_number: str = None, document_manager = Non
                 print(f"=== PDF_Print_V12: 开始为 {part_number} 下载PDF ===")
                 print(f"保存目录: {pdf_save_dir}")
             else:
-                # 备选方案：根据Excel中的document_maintenance_path和part_number动态拼接路径
-                if data_row and 'document_maintenance_path' in data_row:
-                    document_maintenance_path = str(data_row['document_maintenance_path']).strip()
-                    # 确保路径格式正确（处理Windows和Unix路径分隔符）
-                    document_maintenance_path = document_maintenance_path.replace('/', os.sep).replace('\\', os.sep)
-                    pdf_save_dir = os.path.join(document_maintenance_path, part_number)
-                    print(f"=== 根据Excel数据构建PDF保存路径 ===")
-                    print(f"document_maintenance_path: {document_maintenance_path}")
-                    print(f"part_number: {part_number}")
-                    print(f"PDF保存目录: {pdf_save_dir}")
-                else:
-                    # 最后的备选方案：使用默认路径
-                    base_path = "C:\\OES\\AI\\PIMS_Automation\\IAM\\PEDA\\PEDA_Ducuments"
-                    pdf_save_dir = os.path.join(base_path, part_number)
-                    print(f"=== 使用默认路径保存PDF ===")
-                    print(f"保存目录: {pdf_save_dir}")
+                # 备选方案：使用默认路径（document_maintenance_path 不再从Excel读取）
+                print("⚠️ 警告：document_manager 不可用，使用默认路径")
+                base_path = "C:\\OES\\AI\\PIMS_Automation\\IAM\\PEDA\\PEDA_Ducuments"
+                pdf_save_dir = os.path.join(base_path, part_number)
+                print(f"=== 使用默认路径保存PDF ===")
+                print(f"保存目录: {pdf_save_dir}")
                 
                 # 确保目录存在
                 os.makedirs(pdf_save_dir, exist_ok=True)

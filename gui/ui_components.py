@@ -323,15 +323,29 @@ class UIComponentManager:
                                   activebackground=self.colors['primary_light'],
                                   height=1, width=15)
         self.app.excel_btn.pack(side=tk.RIGHT, padx=(8, 0))
+
+        # 件号预览区域
+        preview_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
+        preview_frame.grid(row=1, column=1, sticky=tk.W, pady=(0, 10), padx=(0, 10))
+
+        self.app.total_parts_label = tk.Label(preview_frame, textvariable=self.app.total_parts_var,
+                bg=self.colors['neutral_100'], fg=self.colors['neutral_600'],
+                font=('微软雅黑', 9, 'italic'))
+        self.app.total_parts_label.pack(side=tk.LEFT, padx=(0, 15))
+
+        self.app.qualified_parts_label = tk.Label(preview_frame, textvariable=self.app.qualified_parts_var,
+                bg=self.colors['neutral_100'], fg=self.colors['success'],
+                font=('微软雅黑', 9, 'italic', 'bold'))
+        self.app.qualified_parts_label.pack(side=tk.LEFT)
         
         # 文档路径选择
         self.app.document_path_label = tk.Label(file_grid, text=get_text(self.app.current_language, 'document_path'),
                 bg=self.colors['neutral_100'], fg=self.colors['neutral_700'],
                 font=('微软雅黑', 9, 'bold'))
-        self.app.document_path_label.grid(row=1, column=0, sticky=tk.W, pady=(0, 6), padx=(0, 10))
+        self.app.document_path_label.grid(row=2, column=0, sticky=tk.W, pady=(0, 6), padx=(0, 10))
         
         document_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
-        document_frame.grid(row=1, column=1, sticky=tk.W+tk.E, pady=(0, 6))
+        document_frame.grid(row=2, column=1, sticky=tk.W+tk.E, pady=(0, 6))
         
         self.app.document_entry = tk.Entry(document_frame, textvariable=self.app.document_path_var, 
                                       font=('微软雅黑', 9), state='readonly',
@@ -347,6 +361,19 @@ class UIComponentManager:
                                      activebackground=self.colors['primary_light'],
                                      height=1, width=15)
         self.app.document_btn.pack(side=tk.RIGHT, padx=(8, 0))
+
+        # 生成文件夹按钮
+        generate_folder_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
+        generate_folder_frame.grid(row=3, column=1, sticky=tk.E, pady=(5, 0))
+
+        self.app.generate_folder_btn = tk.Button(generate_folder_frame, text="生成文件夹",
+                                     font=('微软雅黑', 9, 'bold'), bg=self.colors['info'],
+                                     fg=self.colors['white'], relief='flat',
+                                     padx=20, pady=8, cursor='hand2',
+                                     command=self.app.function_controller.generate_upload_folders,
+                                     activebackground=self.colors['info_light'],
+                                     height=1, width=15, state='disabled')
+        self.app.generate_folder_btn.pack(side=tk.RIGHT, padx=(8, 0))
         
         file_grid.columnconfigure(1, weight=1)
         

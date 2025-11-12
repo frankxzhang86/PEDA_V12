@@ -11,6 +11,7 @@ from modules.peda_processor import process_single_peda, validate_data_row, prepa
 
 
 def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]], 
+                        document_path: str,
                         username: str, password: str, system_language: str = 'en',
                         progress_callback: Optional[Callable] = None, 
                         log_callback: Optional[Callable] = None,
@@ -25,6 +26,7 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
     Args:
         playwright: Playwright实例
         data_rows: 数据行列表
+        document_path: 文档主目录路径（从GUI传入）
         username: 用户名
         password: 密码
         system_language: 系统语言
@@ -111,8 +113,8 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
                     failed_count += 1
                     continue
                 
-                # 处理单个PEDA
-                if process_single_peda(page, processed_row, log_callback, upload_record_callback):
+                # 处理单个PEDA（传递document_path）
+                if process_single_peda(page, processed_row, document_path, log_callback, upload_record_callback):
                     success_count += 1
                     log(f"✅ [{index+1}/{total_count}] 件号 {current_part} 处理完成", "SUCCESS")
                 else:

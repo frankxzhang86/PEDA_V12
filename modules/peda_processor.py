@@ -10,6 +10,7 @@ from .pdf_processor import print_coversheet_pdf_v12
 
 
 def process_single_peda(page: Page, data_row: Dict[str, Any], 
+                       document_maintenance_path: str,
                        log_callback: Optional[Callable] = None,
                        upload_record_callback: Optional[Callable] = None) -> bool:
     """
@@ -18,6 +19,7 @@ def process_single_peda(page: Page, data_row: Dict[str, Any],
     Args:
         page: 已登录的页面对象
         data_row: 单行数据
+        document_maintenance_path: 文档主目录路径（从GUI传入）
         log_callback: 日志回调函数
         upload_record_callback: 上传记录回调函数
         
@@ -32,15 +34,16 @@ def process_single_peda(page: Page, data_row: Dict[str, Any],
             print(f"[{level}] {message}")
     
     try:
-        # 从data_row中提取数据
+        # 从data_row中提取数据（必填字段）
         part_number = data_row.get('part_number', '')
+        reason = data_row.get('reason', '')
+        decision_region = data_row.get('decision_region', '')
+        decision_value = data_row.get('decision_value', '')
+        
+        # 选填字段（提供默认值）
         contact = data_row.get('contact', 'Pipar Pan')
         project_type = data_row.get('project_type', '2')
-        reason = data_row.get('reason', '250')
         sample_quantity = data_row.get('sample_quantity', '10')
-        decision_region = data_row.get('decision_region', 'Asia')
-        decision_value = data_row.get('decision_value', '10')
-        document_maintenance_path = data_row.get('document_maintenance_path', 'C:/PEDA_Documents/')
         
         if not part_number:
             log("❌ 件号为空，跳过处理", "ERROR")
@@ -154,7 +157,7 @@ def process_single_peda(page: Page, data_row: Dict[str, Any],
 
 def validate_data_row(data_row: Dict[str, Any]) -> bool:
     """
-    验证单行数据的完整性
+    验证单行数据的完整性（只验证必填字段）
     
     Args:
         data_row: 数据行
@@ -162,10 +165,9 @@ def validate_data_row(data_row: Dict[str, Any]) -> bool:
     Returns:
         bool: 数据有效返回True
     """
+    # 只验证4个必填字段
     required_fields = [
-        'part_number', 'contact', 'project_type', 'reason',
-        'sample_quantity', 'decision_region', 'decision_value',
-        'document_maintenance_path'
+        'part_number', 'reason', 'decision_region', 'decision_value'
     ]
     
     for field in required_fields:
@@ -177,7 +179,7 @@ def validate_data_row(data_row: Dict[str, Any]) -> bool:
 
 def prepare_data_row(data_row: Dict[str, Any]) -> Dict[str, Any]:
     """
-    预处理数据行，确保数据格式正确
+    预处理数据行，确保数据格式正确，并为选填字段提供默认值
     
     Args:
         data_row: 原始数据行
@@ -187,16 +189,23 @@ def prepare_data_row(data_row: Dict[str, Any]) -> Dict[str, Any]:
     """
     processed_row = data_row.copy()
     
-    # 确保字符串字段不为空
-    string_fields = ['part_number', 'contact', 'decision_region', 'document_maintenance_path']
-    for field in string_fields:
+    # 确保必填字段为字符串格式
+    required_fields = ['part_number', 'reason', 'decision_region', 'decision_value']
+    for field in required_fields:
         if field in processed_row:
             processed_row[field] = str(processed_row[field]).strip()
     
-    # 确保数值字段为字符串格式
-    numeric_fields = ['project_type', 'reason', 'sample_quantity', 'decision_value']
-    for field in numeric_fields:
-        if field in processed_row:
+    # 选填字段，提供默认值
+    optional_defaults = {
+        'contact': 'Pipar Pan',
+        'project_type': '2',
+        'sample_quantity': '10'
+    }
+    
+    for field, default_value in optional_defaults.items():
+        if field not in processed_row or not str(processed_row[field]).strip():
+            processed_row[field] = default_value
+        else:
             processed_row[field] = str(processed_row[field]).strip()
     
     return processed_row
