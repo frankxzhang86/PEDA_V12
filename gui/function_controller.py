@@ -3,11 +3,14 @@ PEDA自动化处理工具 - 功能控制模块
 包含所有功能和业务逻辑处理
 """
 
-import threading
 import os
+import re
+import threading
 from datetime import datetime
-from tkinter import messagebox, filedialog
-from .languages import get_text, LANGUAGES
+from tkinter import filedialog, messagebox
+
+from config.constants import PART_NUMBER_COLUMN
+from .languages import LANGUAGES, get_text
 
 
 class FunctionController:
@@ -65,12 +68,24 @@ class FunctionController:
 
             total_rows = validation_result['total_rows']
             qualified_rows = validation_result['qualified_rows_count']
+
+            if validation_result.get('has_duplicates'):
+                duplicates = validation_result.get('duplicate_part_numbers', [])
+                duplicates_preview = ", ".join(duplicates[:5])
+                more_hint = "" if len(duplicates) <= 5 else f" 等 {len(duplicates)} 个"
+                error_text = f"检测到重复件号: {duplicates_preview}{more_hint}"
+                self.log_message(error_text, "ERROR")
+                messagebox.showerror("Excel错误", f"{error_text}\n请移除重复件号后重新导入。")
+                self.app.total_parts_var.set(f"总行数: {total_rows}")
+                self.app.qualified_parts_var.set("合格行数: 0")
+                return
             
             self.app.total_parts_var.set(f"总行数: {total_rows}")
             self.app.qualified_parts_var.set(f"合格行数: {qualified_rows}")
 
             if qualified_rows > 0:
-                self.qualified_part_numbers = validation_result['qualified_df']['part_number'].astype(str).tolist()
+                part_series = validation_result['qualified_df'][PART_NUMBER_COLUMN].astype(str).str.strip()
+                self.qualified_part_numbers = part_series.tolist()
                 self.log_message(f"验证完成: {total_rows}行数据中，有{qualified_rows}行合格。", "SUCCESS")
             else:
                 self.log_message("验证完成，但没有找到合格的数据行。", "WARNING")
@@ -121,20 +136,21 @@ class FunctionController:
         
         try:
             for part_number in self.qualified_part_numbers:
-                # 清理件号，防止创建无效的文件夹名
-                safe_part_number = str(part_number).strip().replace('/', '_').replace('\\', '_')
+                raw_value = str(part_number).strip()
+                safe_part_number = re.sub(r'[<>:"/\\|?*]', '_', raw_value).rstrip('. ').strip()
                 if not safe_part_number:
                     skipped_count += 1
+                    self.log_message(f"件号 '{raw_value}' 为空或包含非法字符，已跳过。", "WARNING")
                     continue
                 
                 folder_path = os.path.join(target_dir, safe_part_number)
                 
                 try:
-                    if not os.path.exists(folder_path):
-                        os.makedirs(folder_path)
-                        created_count += 1
-                    else:
+                    if os.path.exists(folder_path):
                         skipped_count += 1
+                        continue
+                    os.makedirs(folder_path, exist_ok=True)
+                    created_count += 1
                 except Exception as e:
                     self.log_message(f"创建文件夹 '{folder_path}' 失败: {e}", "ERROR")
                     error_count += 1
@@ -256,6 +272,8 @@ class FunctionController:
             print(f"[DEBUG] username: {username}")
             password = self.app.password_var.get()
             print(f"[DEBUG] password: {password}")
+            headless_mode = bool(self.app.headless_mode_var.get())
+            headless_label = "Headless" if headless_mode else "可视化"
             
             # 系统语言映射
             sys_lang_map = {
@@ -270,6 +288,7 @@ class FunctionController:
             self.log_message(f"- 文档路径: {document_path}")
             self.log_message(f"- 用户: {username}")
             self.log_message(f"- 系统语言: {system_language}")
+            self.log_message(f"- 浏览器模式: {headless_label}")
             
             print(f"[DEBUG] use_browser_reuse: {self.use_browser_reuse}")
             # 根据模式选择处理函数
@@ -293,7 +312,8 @@ class FunctionController:
                     login_url=login_url,
                     browser_path=browser_path,
                     preferred_browser=preferred_browser,
-                    browser_finder=self._browser_finder  # 传递预热的 browser_finder
+                    browser_finder=self._browser_finder,  # 传递预热的 browser_finder
+                    headless=headless_mode
                 )
                 print(f"[DEBUG] run_with_gui_params_v2 returned: {result}")
             else:
@@ -305,7 +325,8 @@ class FunctionController:
                     password=password,
                     system_language=system_language,
                     progress_callback=self.update_progress_from_callback,
-                    log_callback=self.log_message_from_callback
+                    log_callback=self.log_message_from_callback,
+                    headless=headless_mode
                 )
                 print(f"[DEBUG] run_with_gui_params returned: {result}")
             # 新增：同步统计到界面

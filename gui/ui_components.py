@@ -278,6 +278,13 @@ class UIComponentManager:
                                                   command=self.app.toggle_password_visibility)
         self.app.show_password_cb.pack(side=tk.LEFT)
         
+        self.app.headless_mode_cb = tk.Checkbutton(left_options, text=get_text(self.app.current_language, 'headless_mode'),
+                                                  variable=self.app.headless_mode_var,
+                                                  bg=self.colors['neutral_100'], fg=self.colors['neutral_600'],
+                                                  font=('微软雅黑', 9), activebackground=self.colors['neutral_100'],
+                                                  selectcolor=self.colors['white'])
+        self.app.headless_mode_cb.pack(side=tk.LEFT, padx=(15, 0))
+        
         # 登录按钮 - 统一按钮样式，设置固定宽度
         self.app.save_settings_btn = tk.Button(options_frame, text=get_text(self.app.current_language, 'login'),
                                           font=('微软雅黑', 9, 'bold'), 
@@ -366,7 +373,9 @@ class UIComponentManager:
         generate_folder_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
         generate_folder_frame.grid(row=3, column=1, sticky=tk.E, pady=(5, 0))
 
-        self.app.generate_folder_btn = tk.Button(generate_folder_frame, text="生成文件夹",
+        self.app.generate_folder_btn = tk.Button(
+            generate_folder_frame,
+            text=get_text(self.app.current_language, 'generate_folders'),
                                      font=('微软雅黑', 9, 'bold'), bg=self.colors['info'],
                                      fg=self.colors['white'], relief='flat',
                                      padx=20, pady=8, cursor='hand2',

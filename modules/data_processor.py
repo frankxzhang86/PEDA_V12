@@ -1,8 +1,14 @@
-import pandas as pd
 import os
 import tkinter as tk
 from tkinter import filedialog
-from config.constants import REQUIRED_COLUMNS
+
+import pandas as pd
+
+from config.constants import PART_NUMBER_COLUMN, REQUIRED_COLUMNS
+
+
+def _strip_string(value):
+    return value.strip() if isinstance(value, str) else value
 
 def read_excel_data(file_path):
     """从Excel文件读取数据"""
@@ -75,7 +81,9 @@ def validate_excel_data(df: pd.DataFrame):
                   'missing_columns': list,    # 缺少的必填列名
                   'total_rows': int,          # 总行数
                   'qualified_rows_count': int,# 合格行数（必填字段不为空）
-                  'qualified_df': pd.DataFrame # 只包含合格行的DataFrame
+                  'qualified_df': pd.DataFrame,# 只包含合格行的DataFrame
+                  'has_duplicates': bool,     # 件号是否存在重复
+                  'duplicate_part_numbers': list # 重复的件号列表
               }
     """
     if df is None or df.empty:
@@ -84,7 +92,9 @@ def validate_excel_data(df: pd.DataFrame):
             'missing_columns': REQUIRED_COLUMNS,
             'total_rows': 0,
             'qualified_rows_count': 0,
-            'qualified_df': pd.DataFrame()
+            'qualified_df': pd.DataFrame(),
+            'has_duplicates': False,
+            'duplicate_part_numbers': []
         }
 
     # 1. 检查表头 - 只检查必填列
@@ -95,13 +105,38 @@ def validate_excel_data(df: pd.DataFrame):
             'missing_columns': missing_columns,
             'total_rows': len(df),
             'qualified_rows_count': 0,
-            'qualified_df': pd.DataFrame()
+            'qualified_df': pd.DataFrame(),
+            'has_duplicates': False,
+            'duplicate_part_numbers': []
         }
 
-    # 2. 筛选合格行 - 只检查4个必填字段不为空
-    # 丢弃必填字段中有任何空值的行
-    qualified_df = df.dropna(subset=REQUIRED_COLUMNS)
-    
+    working_df = df.copy()
+    for column in REQUIRED_COLUMNS:
+        if column in working_df.columns:
+            working_df[column] = working_df[column].apply(_strip_string)
+            working_df[column] = working_df[column].replace('', pd.NA)
+
+    # 2. 检查件号唯一性
+    if PART_NUMBER_COLUMN in working_df.columns:
+        normalized_parts = working_df[PART_NUMBER_COLUMN].dropna().astype(str).str.strip()
+        normalized_parts = normalized_parts[normalized_parts != '']
+        duplicate_values = sorted(normalized_parts[normalized_parts.duplicated(keep=False)].unique().tolist())
+    else:
+        duplicate_values = []
+
+    if duplicate_values:
+        return {
+            'headers_valid': True,
+            'missing_columns': [],
+            'total_rows': len(df),
+            'qualified_rows_count': 0,
+            'qualified_df': pd.DataFrame(),
+            'has_duplicates': True,
+            'duplicate_part_numbers': duplicate_values
+        }
+
+    # 3. 筛选合格行 - 只检查4个必填字段不为空或空白字符串
+    qualified_df = working_df.dropna(subset=REQUIRED_COLUMNS)
     qualified_rows_count = len(qualified_df)
 
     return {
@@ -109,7 +144,9 @@ def validate_excel_data(df: pd.DataFrame):
         'missing_columns': [],
         'total_rows': len(df),
         'qualified_rows_count': qualified_rows_count,
-        'qualified_df': qualified_df
+        'qualified_df': qualified_df,
+        'has_duplicates': False,
+        'duplicate_part_numbers': []
     }
 
 

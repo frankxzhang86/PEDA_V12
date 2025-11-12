@@ -26,6 +26,9 @@ REQUIRED_COLUMNS = [
     'decision_value'
 ]
 
+# Excel模板中需要保持唯一性的列
+PART_NUMBER_COLUMN = 'part_number'
+
 # Excel模板中所有可选的列名（包含必填和选填）
 ALL_COLUMNS = [
     'part_number',      # 必填

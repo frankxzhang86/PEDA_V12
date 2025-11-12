@@ -19,7 +19,8 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
                         login_url: Optional[str] = None,
                         browser_path: Optional[str] = None,
                         preferred_browser: str = "auto",
-                        browser_finder = None) -> Dict[str, int]:
+                        browser_finder = None,
+                        headless: bool = False) -> Dict[str, int]:
     """
     批量处理多行数据（浏览器复用版本）
     
@@ -37,6 +38,7 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
         browser_path: 自定义浏览器路径（可选）
         preferred_browser: 首选浏览器类型 ("chrome", "msedge", "auto")
         browser_finder: 预热的浏览器查找器实例（可选，用于加速启动）
+        headless: 是否以Headless模式运行浏览器
         
     Returns:
         Dict[str, int]: 处理结果统计
@@ -67,7 +69,8 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
         if not browser_manager.initialize(playwright, username, password, system_language, 
                                          login_url=login_url, browser_path=browser_path, 
                                          preferred_browser=preferred_browser,
-                                         browser_finder=browser_finder):
+                                         browser_finder=browser_finder,
+                                         headless=headless):
             log("❌ 浏览器初始化失败，终止处理", "ERROR")
             return {
                 'total': total_count,
@@ -175,7 +178,7 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
         browser_manager.cleanup()
 
 
-def run(playwright: Playwright, data_row=None, username=None, password=None, system_language='en', login_url=None) -> None:
+def run(playwright: Playwright, data_row=None, username=None, password=None, system_language='en', login_url=None, headless: bool = False) -> None:
     """
     原有的单次处理函数（保持向后兼容）
     
@@ -186,6 +189,7 @@ def run(playwright: Playwright, data_row=None, username=None, password=None, sys
         password: 密码
         system_language: 系统语言
         login_url: 登录网址
+        headless: 是否以Headless模式运行浏览器
     """
     # 检查是否提供了数据行
     if data_row is None:
@@ -233,7 +237,7 @@ def run(playwright: Playwright, data_row=None, username=None, password=None, sys
     summary = doc_manager.get_upload_summary()
     print(f"文档扫描完成: 共 {summary['total_files']} 个文件在 {summary['categories_with_files']} 个类别中")
     
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=headless)
     context = browser.new_context()
     page = context.new_page()
     

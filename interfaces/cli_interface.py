@@ -38,6 +38,14 @@ def main():
             print(f"必需的列: {REQUIRED_COLUMNS}")
             print("请检查Excel文件的列名是否正确")
             return
+        
+        if validation_result.get('has_duplicates'):
+            duplicates = validation_result.get('duplicate_part_numbers', [])
+            sample = ", ".join(duplicates[:5])
+            suffix = "" if len(duplicates) <= 5 else f" 等 {len(duplicates)} 个"
+            print(f"错误: Excel文件中存在重复件号: {sample}{suffix}")
+            print("请移除重复件号后重新导入。")
+            return
 
         qualified_df = validation_result['qualified_df']
 

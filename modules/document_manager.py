@@ -82,9 +82,9 @@ class DocumentManager:
                 print(f"警告: 文件无读取权限: {file_path}")
                 return False
                 
-            # 检查文件大小（避免过大文件，这里设置为200MB）
+            # 检查文件大小（避免过大文件，这里设置为50MB）
             file_size = file_path.stat().st_size
-            max_size = 200 * 1024 * 1024  # 200MB
+            max_size = 50 * 1024 * 1024  # 50MB
             if file_size > max_size:
                 print(f"警告: 文件过大 ({file_size / 1024 / 1024:.1f}MB): {file_path}")
                 print(f"⚠️ 建议将文件压缩或分割后再上传")

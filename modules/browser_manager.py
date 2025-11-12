@@ -31,6 +31,7 @@ class BrowserManager:
         self.browser_finder: BrowserFinder = None
         self.browser_path: Optional[str] = None
         self.browser_type: Optional[str] = None
+        self.headless: bool = False
         
     def set_log_callback(self, callback: Callable):
         """设置日志回调函数"""
@@ -46,7 +47,8 @@ class BrowserManager:
     def initialize(self, playwright: Playwright, username: str, password: str, 
                    system_language: str = 'en', login_url: Optional[str] = None,
                    browser_path: Optional[str] = None, preferred_browser: str = "auto",
-                   browser_finder: Optional[BrowserFinder] = None) -> bool:
+                   browser_finder: Optional[BrowserFinder] = None,
+                   headless: bool = False) -> bool:
         """
         初始化浏览器并登录
         
@@ -59,6 +61,7 @@ class BrowserManager:
             browser_path: 自定义浏览器路径（可选）
             preferred_browser: 首选浏览器类型 ("chrome", "msedge", "auto")
             browser_finder: 预热的浏览器查找器实例（可选，用于加速启动）
+            headless: 是否以Headless模式启动浏览器
             
         Returns:
             bool: 初始化成功返回True
@@ -71,6 +74,7 @@ class BrowserManager:
             self.username = username
             self.password = password
             self.system_language = system_language
+            self.headless = headless
             # 从配置文件获取登录URL，如果没有提供则使用默认值
             if not login_url:
                 login_url = "https://frd-pim-app.emea.zf-world.com/webui/WebUI_2#deepLink=1&contextID=GL&workspaceID=Main&screen=homepage"
@@ -98,7 +102,7 @@ class BrowserManager:
             # 启动浏览器
             self.log(f"启动浏览器: {self.browser_type} ({self.browser_path})...")
             self.browser = self.playwright.chromium.launch(
-                headless=False, 
+                headless=self.headless, 
                 executable_path=self.browser_path
             )
             self.context = self.browser.new_context()

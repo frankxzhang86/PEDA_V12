@@ -6,7 +6,8 @@
 def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, password: str, 
                           system_language: str = 'en', progress_callback=None, log_callback=None, 
                           upload_record_callback=None, login_url=None, 
-                          browser_path=None, preferred_browser="auto", browser_finder=None):
+                          browser_path=None, preferred_browser="auto", browser_finder=None,
+                          headless: bool = False):
     print(f"[DEBUG] run_with_gui_params_v2 called with excel_path={excel_path}, document_path={document_path}, username={username}, password={password}, system_language={system_language}, login_url={login_url}, browser_path={browser_path}, preferred_browser={preferred_browser}")
     """
     从GUI调用的主要处理函数（浏览器复用版本）
@@ -19,11 +20,13 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
         system_language: 系统语言 ('en' 或 'de')
         progress_callback: 进度回调函数
         log_callback: 日志回调函数
+        headless: 是否以Headless模式运行浏览器
         upload_record_callback: 上传记录回调函数
         login_url: 登录页面URL
         browser_path: 自定义浏览器路径（可选）
         preferred_browser: 首选浏览器类型 ("chrome", "msedge", "auto")
         browser_finder: 预热的浏览器查找器实例（可选，用于加速启动）
+        headless: 是否以Headless模式运行浏览器
     """
     try:
         # 延迟导入，避免主GUI启动变慢
@@ -54,6 +57,15 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
                 log_callback(f"错误: {error_msg}", "ERROR")
                 log_callback(f"必需的列: {REQUIRED_COLUMNS}", "ERROR")
             return False # 或者返回更详细的错误信息
+        
+        if validation_result.get('has_duplicates'):
+            duplicates = validation_result.get('duplicate_part_numbers', [])
+            duplicates_preview = ", ".join(duplicates[:5])
+            more_hint = "" if len(duplicates) <= 5 else f" 等 {len(duplicates)} 个"
+            if log_callback:
+                log_callback(f"错误: Excel文件包含重复件号: {duplicates_preview}{more_hint}", "ERROR")
+                log_callback("请移除重复件号后重新导入。", "ERROR")
+            return False
 
         qualified_df = validation_result['qualified_df']
         
@@ -86,7 +98,8 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
                 login_url=login_url,
                 browser_path=browser_path,
                 preferred_browser=preferred_browser,
-                browser_finder=browser_finder  # 传递预热的 browser_finder
+                browser_finder=browser_finder,  # 传递预热的 browser_finder
+                headless=headless
             )
         print(f"[DEBUG] run_batch_with_reuse returned: {result}")
         
@@ -116,7 +129,8 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
 
 
 def run_with_gui_params(excel_path: str, document_path: str, username: str, password: str, 
-                       system_language: str = 'en', progress_callback=None, log_callback=None):
+                       system_language: str = 'en', progress_callback=None, log_callback=None,
+                       headless: bool = False):
     """
     从GUI调用的主要处理函数（原版本，保持向后兼容）
     
@@ -158,6 +172,15 @@ def run_with_gui_params(excel_path: str, document_path: str, username: str, pass
                 log_callback(f"错误: {error_msg}", "ERROR")
                 log_callback(f"必需的列: {REQUIRED_COLUMNS}", "ERROR")
             return False
+        
+        if validation_result.get('has_duplicates'):
+            duplicates = validation_result.get('duplicate_part_numbers', [])
+            duplicates_preview = ", ".join(duplicates[:5])
+            more_hint = "" if len(duplicates) <= 5 else f" 等 {len(duplicates)} 个"
+            if log_callback:
+                log_callback(f"错误: Excel文件包含重复件号: {duplicates_preview}{more_hint}", "ERROR")
+                log_callback("请移除重复件号后重新导入。", "ERROR")
+            return False
 
         qualified_df = validation_result['qualified_df']
 
@@ -189,7 +212,7 @@ def run_with_gui_params(excel_path: str, document_path: str, username: str, pass
                 
                 try:
                     # 调用处理函数，传入GUI参数
-                    result = run(playwright, row, username, password, system_language)
+                    result = run(playwright, row, username, password, system_language, headless=headless)
                     
                     if result is not False: # 如果没有明确返回False，认为成功
                         success_count += 1

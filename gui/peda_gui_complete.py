@@ -95,6 +95,7 @@ class PEDAAutomationGUI:
         self.password_var = tk.StringVar()
         self.remember_password_var = tk.BooleanVar()
         self.show_password_var = tk.BooleanVar()
+        self.headless_mode_var = tk.BooleanVar()
         self.excel_file_var = tk.StringVar()
         self.document_path_var = tk.StringVar()
         self.ui_language_var = tk.StringVar(value='中文')
@@ -375,6 +376,8 @@ class PEDAAutomationGUI:
                 self.remember_cb.config(text=texts['remember_password'])
             if hasattr(self, 'show_password_cb'):
                 self.show_password_cb.config(text=texts['show_password'])
+            if hasattr(self, 'headless_mode_cb'):
+                self.headless_mode_cb.config(text=texts['headless_mode'])
             if hasattr(self, 'save_settings_btn'):
                 self.save_settings_btn.config(text=texts.get('save_settings', texts.get('login', '保存')))
             # 文件选择区
@@ -386,6 +389,8 @@ class PEDAAutomationGUI:
                 self.document_path_label.config(text=texts['document_path'])
             if hasattr(self, 'document_btn'):
                 self.document_btn.config(text=texts['choose_folder'])
+            if hasattr(self, 'generate_folder_btn'):
+                self.generate_folder_btn.config(text=texts.get('generate_folders', '📁 Generate Folders'))
             # 操作按钮
             if hasattr(self, 'start_btn'):
                 self.start_btn.config(text=texts['start_processing'])
@@ -444,7 +449,8 @@ class PEDAAutomationGUI:
                 'login_url': self.login_url_var.get(),
                 'browser': {
                     'preferred_type': getattr(self, 'browser_preferred_type', 'auto'),
-                    'custom_path': getattr(self, 'browser_custom_path', None)
+                    'custom_path': getattr(self, 'browser_custom_path', None),
+                    'headless': self.headless_mode_var.get()
                 }
             }
             
@@ -490,6 +496,7 @@ class PEDAAutomationGUI:
                 browser_config = config.get('browser', {})
                 self.browser_preferred_type = browser_config.get('preferred_type', 'auto')
                 self.browser_custom_path = browser_config.get('custom_path', None)
+                self.headless_mode_var.set(browser_config.get('headless', False))
                 
                 self.update_ui_texts()
                 self.update_language_buttons()
