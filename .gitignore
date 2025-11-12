@@ -46,6 +46,7 @@ ENV/
 # 临时/调试/日志文件
 *.log
 *.tmp
+error_screenshot/
 error_screenshot_*.png
 language_setting_error.png
 

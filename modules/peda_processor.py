@@ -146,11 +146,19 @@ def process_single_peda(page: Page, data_row: Dict[str, Any],
         
         # 截图保存错误状态
         try:
-            screenshot_path = os.path.join(os.getcwd(), f"error_screenshot_{part_number}.png")
+            # 创建错误截图目录
+            error_screenshot_dir = os.path.join(os.getcwd(), "error_screenshot")
+            os.makedirs(error_screenshot_dir, exist_ok=True)
+            
+            # 生成带时间戳的截图文件名
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            screenshot_path = os.path.join(error_screenshot_dir, f"error_{part_number}_{timestamp}.png")
+            
             page.screenshot(path=screenshot_path)
             log(f"错误截图已保存到: {screenshot_path}")
-        except Exception:
-            pass
+        except Exception as screenshot_error:
+            log(f"保存错误截图失败: {str(screenshot_error)}", "WARNING")
         
         return False
 

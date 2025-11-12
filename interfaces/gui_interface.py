@@ -21,6 +21,7 @@ def run_with_gui_params_v2(excel_path: str, document_path: str, username: str, p
         progress_callback: 进度回调函数
         log_callback: 日志回调函数
         headless: 是否以Headless模式运行浏览器
+        headless: 是否以Headless模式运行浏览器
         upload_record_callback: 上传记录回调函数
         login_url: 登录页面URL
         browser_path: 自定义浏览器路径（可选）
