@@ -56,9 +56,14 @@ test_error_handling_*.xlsx
 # 用户隐私配置
 peda_config.json
 
+# 测试目录和文件
+TEST/
+test_*.py
+
 # 个人/临时Excel
 *.bak
 ~$*
+*.xlsx~
 
 # PDF导出和下载目录（如有）
 PDF_Downloads/
@@ -78,6 +83,9 @@ libs/
 
 # Ignore additional build artifacts
 start.cpython-*.pyc
+
+# Gemini 临时文件
+.gemini-clipboard/
 
 # 说明：如有其它不希望打包的临时或个人文件，可继续补充
 auto_form_fill_2.py

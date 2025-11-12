@@ -1,5 +1,63 @@
-import pandas as pd
 import os
+
+import pandas as pd
+from openpyxl.styles import Alignment, Font, PatternFill
+from openpyxl.utils import get_column_letter
+
+MANDATORY_FIELDS = {"part_number", "reason", "decision_region", "decision_value"}
+
+
+def autofit_columns(sheet, minimum=12, maximum=60, padding=2):
+    """Auto-adjust column widths based on the longest cell content."""
+    for column_cells in sheet.columns:
+        first_cell = column_cells[0]
+        column_letter = getattr(first_cell, "column_letter", None)
+        if column_letter is None:
+            column_letter = get_column_letter(first_cell.column)
+
+        max_length = 0
+        for cell in column_cells:
+            if cell.value is None:
+                continue
+            cell_length = len(str(cell.value))
+            if cell_length > max_length:
+                max_length = cell_length
+
+        adjusted_width = max(minimum, min(max_length + padding, maximum))
+        sheet.column_dimensions[column_letter].width = adjusted_width
+
+
+def style_instruction_sheet(sheet):
+    """Apply light styling to the Instructions sheet."""
+    header_fill = PatternFill(start_color="BDD7EE", end_color="BDD7EE", fill_type="solid")
+    header_font = Font(bold=True, color="000000")
+    center_align = Alignment(vertical="center", wrap_text=True)
+
+    for cell in sheet[1]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = center_align
+
+    sheet.freeze_panes = "A2"
+    autofit_columns(sheet, minimum=15, maximum=90)
+
+
+def style_data_sheet(sheet):
+    """Highlight mandatory headers and apply consistent styling."""
+    mandatory_fill = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")
+    optional_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+    header_font = Font(bold=True, color="000000")
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    for cell in sheet[1]:
+        is_mandatory = str(cell.value) in MANDATORY_FIELDS
+        cell.fill = mandatory_fill if is_mandatory else optional_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+
+    sheet.freeze_panes = "A2"
+    autofit_columns(sheet, minimum=15, maximum=50)
+
 
 def create_peda_upload_template():
     """
@@ -20,8 +78,8 @@ def create_peda_upload_template():
         "sample_quantity": ["10", "20", ""]
     }
     df_template = pd.DataFrame(data_template)
-    
-        # --- 2. 创建使用说明工作表 (Instruction Sheet) ---
+
+    # --- 2. 创建使用说明工作表 (Instruction Sheet) ---
     instructions_data = {
         "字段名 (Field Name)": [
             "part_number",
@@ -70,22 +128,11 @@ def create_peda_upload_template():
             
             # 获取工作簿对象以便进行格式调整
             workbook = writer.book
-            
-            # 调整 Instructions 工作表的列宽
             instructions_sheet = workbook['Instructions']
-            instructions_sheet.column_dimensions['A'].width = 25
-            instructions_sheet.column_dimensions['B'].width = 100
-            instructions_sheet.column_dimensions['C'].width = 20
-            
-            # 调整 PEDA Upload Data 工作表的列宽
             data_sheet = workbook['PEDA Upload Data']
-            data_sheet.column_dimensions['A'].width = 15  # part_number
-            data_sheet.column_dimensions['B'].width = 12  # reason
-            data_sheet.column_dimensions['C'].width = 15  # decision_region
-            data_sheet.column_dimensions['D'].width = 12  # decision_value
-            data_sheet.column_dimensions['E'].width = 15  # contact
-            data_sheet.column_dimensions['F'].width = 12  # project_type
-            data_sheet.column_dimensions['G'].width = 15  # sample_quantity
+
+            style_instruction_sheet(instructions_sheet)
+            style_data_sheet(data_sheet)
         
         print("=" * 60)
         print("✅ 成功！PEDA V12 上传模板文件已创建")
