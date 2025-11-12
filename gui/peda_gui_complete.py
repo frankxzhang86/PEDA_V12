@@ -193,7 +193,7 @@ class PEDAAutomationGUI:
         # 启动时间更新
         self.update_time()
         # 所有UI加载完毕后再设置大小和居中，并显示窗口
-        self.root.geometry("900x900")
+        self.root.geometry("850x700")
         self.center_window()
         self.root.deiconify()
         
@@ -309,17 +309,17 @@ class PEDAAutomationGUI:
     def update_language_buttons(self):
         """更新语言按钮的选中状态"""
         # 重置所有按钮状态
-        self.en_btn.config(bg=self.colors['primary_pale'], fg=self.colors['primary'], font=('微软雅黑', 9))
-        self.de_btn.config(bg=self.colors['primary_pale'], fg=self.colors['primary'], font=('微软雅黑', 9))
-        self.zh_btn.config(bg=self.colors['primary_pale'], fg=self.colors['primary'], font=('微软雅黑', 9))
+        self.en_btn.config(bg=self.colors['primary_pale'], fg=self.colors['primary'], font=('微软雅黑', 10))
+        self.de_btn.config(bg=self.colors['primary_pale'], fg=self.colors['primary'], font=('微软雅黑', 10))
+        self.zh_btn.config(bg=self.colors['primary_pale'], fg=self.colors['primary'], font=('微软雅黑', 10))
         
         # 高亮当前选中的语言按钮
         if self.current_language == 'en':
-            self.en_btn.config(bg=self.colors['white'], fg=self.colors['primary'], font=('微软雅黑', 9, 'bold'))
+            self.en_btn.config(bg=self.colors['white'], fg=self.colors['primary'], font=('微软雅黑', 10, 'bold'))
         elif self.current_language == 'de':
-            self.de_btn.config(bg=self.colors['white'], fg=self.colors['primary'], font=('微软雅黑', 9, 'bold'))
+            self.de_btn.config(bg=self.colors['white'], fg=self.colors['primary'], font=('微软雅黑', 10, 'bold'))
         elif self.current_language == 'zh':
-            self.zh_btn.config(bg=self.colors['white'], fg=self.colors['primary'], font=('微软雅黑', 9, 'bold'))
+            self.zh_btn.config(bg=self.colors['white'], fg=self.colors['primary'], font=('微软雅黑', 10, 'bold'))
         
     def update_ui_texts(self):
         """更新界面文本"""
@@ -329,6 +329,9 @@ class PEDAAutomationGUI:
             texts = LANGUAGES[self.current_language]
             # 更新窗口标题
             self.root.title(texts['title'])
+            # 头部区域
+            if hasattr(self, 'ui_language_label'):
+                self.ui_language_label.config(text=texts['ui_language'])
             # 区域标题
             if hasattr(self, 'login_frame'):
                 self.login_frame.config(text=texts['login_info'])
@@ -345,9 +348,7 @@ class PEDAAutomationGUI:
                 self.notebook.tab(0, text=texts['main_tab'])
                 self.notebook.tab(1, text=texts.get('instructions_tab', 'Instructions'))
                 self.notebook.tab(2, text=texts['logs_tab'])
-            # 使用说明页面
-            if hasattr(self, 'instructions_title_label'):
-                self.instructions_title_label.config(text=texts.get('instructions_title', 'User Manual'))
+            # 使用说明页面（大标题已删除）
             if hasattr(self, 'op_title_label'):
                 self.op_title_label.config(text=texts.get('instructions_op_title', '1. Operation Instructions'))
             if hasattr(self, 'op_content_label'):
@@ -361,10 +362,8 @@ class PEDAAutomationGUI:
             if hasattr(self, 'dir_title_label'):
                 self.dir_title_label.config(text=texts.get('instructions_dir_title', '3. Document Directory Structure Requirements'))
             if hasattr(self, 'dir_content_text'):
-                self.dir_content_text.config(state='normal')
-                self.dir_content_text.delete('1.0', tk.END)
-                self.dir_content_text.insert('1.0', texts.get('instructions_dir_content', '').strip())
-                self.dir_content_text.config(state='disabled')
+                # 现在是Label控件，直接更新text
+                self.dir_content_text.config(text=texts.get('instructions_dir_content', '').strip())
             # 登录区
             if hasattr(self, 'login_url_label'):
                 self.login_url_label.config(text=texts.get('login_url', '登录网址'))

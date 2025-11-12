@@ -56,9 +56,10 @@ class UIComponentManager:
         lang_container = tk.Frame(header_frame, bg=self.colors['primary'])
         lang_container.pack(side=tk.RIGHT, fill=tk.Y, padx=25, pady=15)
         
-        tk.Label(lang_container, text="Language:", 
+        self.app.ui_language_label = tk.Label(lang_container, text=get_text(self.app.current_language, 'ui_language'), 
                 bg=self.colors['primary'], fg=self.colors['primary_pale'],
-                font=('微软雅黑', 9)).pack(anchor='e')
+                font=('微软雅黑', 10))
+        self.app.ui_language_label.pack(anchor='e')
         
         lang_frame = tk.Frame(lang_container, bg=self.colors['primary'])
         lang_frame.pack(anchor='e', pady=(5, 0))
@@ -66,7 +67,7 @@ class UIComponentManager:
         # 语言切换按钮 - 使用新的色彩系统
         self.app.en_btn = tk.Button(lang_frame, text="English", 
                                bg=self.colors['primary_pale'], fg=self.colors['primary'],
-                               font=('微软雅黑', 9),
+                               font=('微软雅黑', 10),
                                relief='flat', padx=12, pady=4,
                                cursor='hand2',
                                command=lambda: self.app.switch_language('en'))
@@ -74,15 +75,14 @@ class UIComponentManager:
         
         self.app.de_btn = tk.Button(lang_frame, text="Deutsch", 
                                bg=self.colors['primary_pale'], fg=self.colors['primary'],
-                               font=('微软雅黑', 9),
+                               font=('微软雅黑', 10),
                                relief='flat', padx=12, pady=4,
-                               cursor='hand2',
-                               command=lambda: self.app.switch_language('de'))
-        self.app.de_btn.pack(side=tk.LEFT, padx=(2, 2))
+                               command=lambda: self.app.switch_language('de'), cursor='hand2')
+        self.app.de_btn.pack(side=tk.LEFT, padx=(5, 0))
         
         self.app.zh_btn = tk.Button(lang_frame, text="中文", 
-                               bg=self.colors['white'], fg=self.colors['primary'],
-                               font=('微软雅黑', 9, 'bold'),
+                               bg=self.colors['primary_pale'], fg=self.colors['primary'],
+                               font=('微软雅黑', 10, 'bold'),
                                relief='flat', padx=12, pady=4,
                                cursor='hand2',
                                command=lambda: self.app.switch_language('zh'))
@@ -131,35 +131,29 @@ class UIComponentManager:
         content_frame = tk.Frame(scrollable_frame, bg=self.colors['white'], padx=20, pady=20)
         content_frame.pack(fill=tk.BOTH, expand=True)
 
-        # 1. 大标题
-        self.app.instructions_title_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_title'),
-                                   font=('微软雅黑', 16, 'bold'), bg=self.colors['white'],
-                                   fg=self.colors['dark'])
-        self.app.instructions_title_label.pack(anchor='w', pady=(0, 20))
-
-        # 2. 操作说明
+        # 1. 操作说明（去掉大标题）
         self.app.op_title_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_op_title'),
                                  font=('微软雅黑', 12, 'bold'), bg=self.colors['white'],
                                  fg=self.colors['primary'])
-        self.app.op_title_label.pack(anchor='w', pady=(10, 5))
+        self.app.op_title_label.pack(anchor='w', pady=(0, 3))
 
         self.app.op_content_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_op_content'),
                                    font=('微软雅黑', 10), bg=self.colors['white'],
                                    wraplength=700, justify='left',
                                    fg=self.colors['neutral_700'])
-        self.app.op_content_label.pack(anchor='w', pady=(0, 15))
+        self.app.op_content_label.pack(anchor='w', pady=(0, 10))
 
-        # 3. 上传表格说明
+        # 2. 上传表格说明
         self.app.excel_title_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_excel_title'),
                                     font=('微软雅黑', 12, 'bold'), bg=self.colors['white'],
                                     fg=self.colors['primary'])
-        self.app.excel_title_label.pack(anchor='w', pady=(10, 5))
+        self.app.excel_title_label.pack(anchor='w', pady=(5, 3))
 
         self.app.excel_content_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_excel_content'),
                                       font=('微软雅黑', 10), bg=self.colors['white'],
                                       wraplength=700, justify='left',
                                       fg=self.colors['neutral_700'])
-        self.app.excel_content_label.pack(anchor='w', pady=(0, 10))
+        self.app.excel_content_label.pack(anchor='w', pady=(0, 8))
 
         self.app.download_template_btn = tk.Button(content_frame, text=get_text(self.app.current_language, 'instructions_download_template'),
                                                  font=('微软雅黑', 10, 'bold'), bg=self.colors['success'],
@@ -167,28 +161,44 @@ class UIComponentManager:
                                                  padx=20, pady=8, cursor='hand2',
                                                  command=self.app.download_template_file,
                                                  activebackground=self.colors['success_light'])
-        self.app.download_template_btn.pack(anchor='w', pady=(5, 20))
+        self.app.download_template_btn.pack(anchor='w', pady=(3, 15))
 
-        # 4. 目录结构要求
+        # 3. 目录结构要求
         self.app.dir_title_label = tk.Label(content_frame, text=get_text(self.app.current_language, 'instructions_dir_title'),
                                   font=('微软雅黑', 12, 'bold'), bg=self.colors['white'],
                                   fg=self.colors['primary'])
-        self.app.dir_title_label.pack(anchor='w', pady=(10, 5))
+        self.app.dir_title_label.pack(anchor='w', pady=(5, 3))
 
-        # 使用Text控件来显示等宽字体内容
-        self.app.dir_content_text = tk.Text(content_frame, font=('Consolas', 10), bg=self.colors['white'],
-                                          fg=self.colors['dark'], relief='flat', borderwidth=0,
-                                          padx=10, pady=10, wrap='none', height=20)
+        # 使用Label显示目录结构，去掉边框
         dir_structure = get_text(self.app.current_language, 'instructions_dir_content').strip()
-        self.app.dir_content_text.insert(tk.END, dir_structure)
-        self.app.dir_content_text.config(state='disabled')
-        self.app.dir_content_text.pack(anchor='w', fill='x', pady=(0, 15))
+        self.app.dir_content_text = tk.Label(content_frame, text=dir_structure,
+                                          font=('Consolas', 10), bg=self.colors['white'],
+                                          fg=self.colors['dark'], justify='left', anchor='nw')
+        self.app.dir_content_text.pack(anchor='w', fill='x', pady=(0, 10))
         
     def create_main_tab_content(self):
         """创建主页面内容"""
-        # 直接在主页面创建内容，不使用滚动区域
-        content_frame = tk.Frame(self.app.main_tab, bg=self.colors['white'])
-        content_frame.pack(fill=tk.BOTH, expand=True, padx=8, pady=5)
+        # 创建一个带滚动条的框架
+        canvas = tk.Canvas(self.app.main_tab, bg=self.colors['white'], highlightthickness=0)
+        scrollbar = ttk.Scrollbar(self.app.main_tab, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas, bg=self.colors['white'])
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # 在可滚动框架中创建内容
+        content_frame = tk.Frame(scrollable_frame, bg=self.colors['white'], padx=8, pady=5)
+        content_frame.pack(fill=tk.BOTH, expand=True)
         
         # 创建各个区域，优化间距
         self.create_login_section(content_frame)
@@ -199,7 +209,7 @@ class UIComponentManager:
         
     def create_login_section(self, parent):
         """创建登录信息区域"""
-        self.app.login_frame = ttk.LabelFrame(parent, text="🔐 Login Information", 
+        self.app.login_frame = ttk.LabelFrame(parent, text=get_text(self.app.current_language, 'login_info'), 
                                          style='Title.TLabelframe', padding=15)
         self.app.login_frame.pack(fill=tk.X, pady=(0, 10))
         
@@ -207,16 +217,16 @@ class UIComponentManager:
         login_grid.pack(fill=tk.X)
         
         # 登录网址输入（移到最上面）
-        self.app.login_url_label = tk.Label(login_grid, text="登录网址", 
+        self.app.login_url_label = tk.Label(login_grid, text=get_text(self.app.current_language, 'login_url'), 
                 bg=self.colors['neutral_100'], fg=self.colors['neutral_700'],
-                font=('微软雅黑', 9, 'bold'))
+                font=('微软雅黑', 10, 'bold'))
         self.app.login_url_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 8), padx=(0, 10))
 
         login_url_frame = tk.Frame(login_grid, bg=self.colors['neutral_100'])
         login_url_frame.grid(row=0, column=1, sticky=tk.W+tk.E, pady=(0, 8))
 
         self.app.login_url_entry = tk.Entry(login_url_frame, textvariable=self.app.login_url_var, 
-                                      font=('微软雅黑', 9), width=50, relief='solid',
+                                      font=('微软雅黑', 10), width=50, relief='solid',
                                       borderwidth=1, bg=self.colors['white'],
                                       fg=self.colors['neutral_700'],
                                       highlightbackground=self.colors['neutral_300'],
@@ -226,12 +236,12 @@ class UIComponentManager:
         # 用户名输入
         self.app.username_label = tk.Label(login_grid, text=get_text(self.app.current_language, 'username'), 
                 bg=self.colors['neutral_100'], fg=self.colors['neutral_700'],
-                font=('微软雅黑', 9, 'bold'))
+                font=('微软雅黑', 10, 'bold'))
         self.app.username_label.grid(row=1, column=0, sticky=tk.W, pady=(0, 8), padx=(0, 10))
         username_frame = tk.Frame(login_grid, bg=self.colors['neutral_100'])
         username_frame.grid(row=1, column=1, sticky=tk.W+tk.E, pady=(0, 8))
         self.app.username_entry = tk.Entry(username_frame, textvariable=self.app.username_var, 
-                                      font=('微软雅黑', 9), width=30, relief='solid',
+                                      font=('微软雅黑', 10), width=30, relief='solid',
                                       borderwidth=1, bg=self.colors['white'],
                                       fg=self.colors['neutral_700'],
                                       highlightbackground=self.colors['neutral_300'],
@@ -241,14 +251,14 @@ class UIComponentManager:
         # 密码输入
         self.app.password_label = tk.Label(login_grid, text=get_text(self.app.current_language, 'password'), 
                 bg=self.colors['neutral_100'], fg=self.colors['neutral_700'],
-                font=('微软雅黑', 9, 'bold'))
+                font=('微软雅黑', 10, 'bold'))
         self.app.password_label.grid(row=2, column=0, sticky=tk.W, pady=(0, 8), padx=(0, 10))
         
         password_frame = tk.Frame(login_grid, bg=self.colors['neutral_100'])
         password_frame.grid(row=2, column=1, sticky=tk.W+tk.E, pady=(0, 8))
         
         self.app.password_entry = tk.Entry(password_frame, textvariable=self.app.password_var, 
-                                      show="*", font=('微软雅黑', 9), width=30, 
+                                      show="*", font=('微软雅黑', 10), width=30, 
                                       relief='solid', borderwidth=1, bg=self.colors['white'],
                                       fg=self.colors['neutral_700'],
                                       highlightbackground=self.colors['neutral_300'],
@@ -266,14 +276,14 @@ class UIComponentManager:
         self.app.remember_cb = tk.Checkbutton(left_options, text=get_text(self.app.current_language, 'remember_password'),
                                          variable=self.app.remember_password_var,
                                          bg=self.colors['neutral_100'], fg=self.colors['neutral_600'],
-                                         font=('微软雅黑', 9), activebackground=self.colors['neutral_100'],
+                                         font=('微软雅黑', 10), activebackground=self.colors['neutral_100'],
                                          selectcolor=self.colors['white'])
         self.app.remember_cb.pack(side=tk.LEFT, padx=(0, 15))
         
         self.app.show_password_cb = tk.Checkbutton(left_options, text=get_text(self.app.current_language, 'show_password'),
                                                   variable=self.app.show_password_var,
                                                   bg=self.colors['neutral_100'], fg=self.colors['neutral_600'],
-                                                  font=('微软雅黑', 9), activebackground=self.colors['neutral_100'],
+                                                  font=('微软雅黑', 10), activebackground=self.colors['neutral_100'],
                                                   selectcolor=self.colors['white'],
                                                   command=self.app.toggle_password_visibility)
         self.app.show_password_cb.pack(side=tk.LEFT)
@@ -281,13 +291,13 @@ class UIComponentManager:
         self.app.headless_mode_cb = tk.Checkbutton(left_options, text=get_text(self.app.current_language, 'headless_mode'),
                                                   variable=self.app.headless_mode_var,
                                                   bg=self.colors['neutral_100'], fg=self.colors['neutral_600'],
-                                                  font=('微软雅黑', 9), activebackground=self.colors['neutral_100'],
+                                                  font=('微软雅黑', 10), activebackground=self.colors['neutral_100'],
                                                   selectcolor=self.colors['white'])
         self.app.headless_mode_cb.pack(side=tk.LEFT, padx=(15, 0))
         
         # 登录按钮 - 统一按钮样式，设置固定宽度
         self.app.save_settings_btn = tk.Button(options_frame, text=get_text(self.app.current_language, 'login'),
-                                          font=('微软雅黑', 9, 'bold'), 
+                                          font=('微软雅黑', 10, 'bold'), 
                                           bg=self.colors['primary'],
                                           fg=self.colors['white'], relief='flat',
                                           padx=20, pady=8, cursor='hand2',
@@ -310,20 +320,20 @@ class UIComponentManager:
         # Excel文件选择
         self.app.excel_file_label = tk.Label(file_grid, text=get_text(self.app.current_language, 'excel_file'), 
                 bg=self.colors['neutral_100'], fg=self.colors['neutral_700'],
-                font=('微软雅黑', 9, 'bold'))
+                font=('微软雅黑', 10, 'bold'))
         self.app.excel_file_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 6), padx=(0, 10))
         
         excel_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
         excel_frame.grid(row=0, column=1, sticky=tk.W+tk.E, pady=(0, 6))
         
         self.app.excel_entry = tk.Entry(excel_frame, textvariable=self.app.excel_file_var, 
-                                   font=('微软雅黑', 9), state='readonly',
+                                   font=('微软雅黑', 10), state='readonly',
                                    relief='solid', borderwidth=1, bg=self.colors['neutral_50'],
                                    fg=self.colors['neutral_600'])
         self.app.excel_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=4)
         
         self.app.excel_btn = tk.Button(excel_frame, text=get_text(self.app.current_language, 'choose_file'),
-                                  font=('微软雅黑', 9, 'bold'), bg=self.colors['primary'],
+                                  font=('微软雅黑', 10, 'bold'), bg=self.colors['primary'],
                                   fg=self.colors['white'], relief='flat',
                                   padx=20, pady=8, cursor='hand2',
                                   command=self.app.choose_excel_file,
@@ -337,46 +347,44 @@ class UIComponentManager:
 
         self.app.total_parts_label = tk.Label(preview_frame, textvariable=self.app.total_parts_var,
                 bg=self.colors['neutral_100'], fg=self.colors['neutral_600'],
-                font=('微软雅黑', 9, 'italic'))
+                font=('微软雅黑', 10, 'italic'))
         self.app.total_parts_label.pack(side=tk.LEFT, padx=(0, 15))
 
         self.app.qualified_parts_label = tk.Label(preview_frame, textvariable=self.app.qualified_parts_var,
                 bg=self.colors['neutral_100'], fg=self.colors['success'],
-                font=('微软雅黑', 9, 'italic', 'bold'))
+                font=('微软雅黑', 10, 'italic', 'bold'))
         self.app.qualified_parts_label.pack(side=tk.LEFT)
         
         # 文档路径选择
         self.app.document_path_label = tk.Label(file_grid, text=get_text(self.app.current_language, 'document_path'),
                 bg=self.colors['neutral_100'], fg=self.colors['neutral_700'],
-                font=('微软雅黑', 9, 'bold'))
+                font=('微软雅黑', 10, 'bold'))
         self.app.document_path_label.grid(row=2, column=0, sticky=tk.W, pady=(0, 6), padx=(0, 10))
         
         document_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
-        document_frame.grid(row=2, column=1, sticky=tk.W+tk.E, pady=(0, 6))
+        document_frame.grid(row=2, column=1, sticky=tk.W+tk.E, pady=(0, 10))
         
         self.app.document_entry = tk.Entry(document_frame, textvariable=self.app.document_path_var, 
-                                      font=('微软雅黑', 9), state='readonly',
+                                      font=('微软雅黑', 10), state='readonly',
                                       relief='solid', borderwidth=1, bg=self.colors['neutral_50'],
                                       fg=self.colors['neutral_600'])
         self.app.document_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=4)
         
         self.app.document_btn = tk.Button(document_frame, text=get_text(self.app.current_language, 'choose_folder'),
-                                     font=('微软雅黑', 9, 'bold'), bg=self.colors['primary'],
+                                     font=('微软雅黑', 10, 'bold'), bg=self.colors['primary'],
                                      fg=self.colors['white'], relief='flat',
                                      padx=20, pady=8, cursor='hand2',
                                      command=self.app.choose_document_folder,
                                      activebackground=self.colors['primary_light'],
                                      height=1, width=15)
         self.app.document_btn.pack(side=tk.RIGHT, padx=(8, 0))
-
-        # 生成文件夹按钮
-        generate_folder_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
-        generate_folder_frame.grid(row=3, column=1, sticky=tk.E, pady=(5, 0))
-
-        self.app.generate_folder_btn = tk.Button(
-            generate_folder_frame,
-            text=get_text(self.app.current_language, 'generate_folders'),
-                                     font=('微软雅黑', 9, 'bold'), bg=self.colors['info'],
+        
+        # 创建文件夹按钮
+        button_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
+        button_frame.grid(row=3, column=1, sticky=tk.W, pady=(0, 0))
+        
+        self.app.generate_folder_btn = tk.Button(button_frame, text=get_text(self.app.current_language, 'generate_folders'),
+                                     font=('微软雅黑', 10, 'bold'), bg=self.colors['info'],
                                      fg=self.colors['white'], relief='flat',
                                      padx=20, pady=8, cursor='hand2',
                                      command=self.app.function_controller.generate_upload_folders,
@@ -443,7 +451,7 @@ class UIComponentManager:
         
         self.app.total_progress_label = tk.Label(progress_container, text=get_text(self.app.current_language, 'total_progress'), 
                 bg=self.colors['neutral_100'], fg=self.colors['neutral_700'],
-                font=('微软雅黑', 9, 'bold'))
+                font=('微软雅黑', 10, 'bold'))
         self.app.total_progress_label.pack(side=tk.LEFT)
         
         self.app.progress_bar = ttk.Progressbar(progress_container, variable=self.app.progress_var,
@@ -452,7 +460,7 @@ class UIComponentManager:
         
         self.app.progress_label = tk.Label(progress_container, text="0%", 
                                       bg=self.colors['neutral_100'], fg=self.colors['neutral_700'],
-                                      font=('微软雅黑', 9, 'bold'))
+                                      font=('微软雅黑', 10, 'bold'))
         self.app.progress_label.pack(side=tk.RIGHT)
         
         # 状态统计
@@ -469,13 +477,13 @@ class UIComponentManager:
             self.app.stats_text_labels[key] = tk.Label(frame, text=get_text(self.app.current_language, text_key), 
                                                       bg=self.colors['neutral_100'], 
                                                       fg=self.colors['neutral_600'],
-                                                      font=('微软雅黑', 9))
+                                                      font=('微软雅黑', 10))
             self.app.stats_text_labels[key].pack(side=tk.LEFT)
             
             self.app.stats_labels[key] = tk.Label(frame, text="0", 
                                              bg=self.colors['neutral_100'], 
                                              fg=self.colors['neutral_700'],
-                                             font=('微软雅黑', 9, 'bold'))
+                                             font=('微软雅黑', 10, 'bold'))
             self.app.stats_labels[key].pack(side=tk.LEFT, padx=(3, 0))
         
         # 当前状态
@@ -484,12 +492,12 @@ class UIComponentManager:
         
         self.app.current_label = tk.Label(status_frame, text=get_text(self.app.current_language, 'current_status'), 
                                          bg=self.colors['neutral_100'], fg=self.colors['neutral_600'],
-                                         font=('微软雅黑', 9))
+                                         font=('微软雅黑', 10))
         self.app.current_label.pack(side=tk.LEFT)
         
         self.app.status_label = tk.Label(status_frame, textvariable=self.app.current_status_var,
                                     bg=self.colors['neutral_100'], fg=self.colors['primary'],
-                                    font=('微软雅黑', 9, 'bold'))
+                                    font=('微软雅黑', 10, 'bold'))
         self.app.status_label.pack(side=tk.LEFT, padx=(3, 0))
         
     def create_record_management_section(self, parent):
@@ -506,7 +514,7 @@ class UIComponentManager:
         
         # 三等分按钮布局 - 使用固定宽度
         self.app.download_report_btn = tk.Button(download_frame, text="文件上传报告",
-                                               font=('微软雅黑', 9, 'bold'), bg=self.colors['secondary'],
+                                               font=('微软雅黑', 10, 'bold'), bg=self.colors['secondary'],
                                                fg=self.colors['white'], relief='flat',
                                                pady=8, cursor='hand2', 
                                                command=self.app.download_report,
@@ -515,7 +523,7 @@ class UIComponentManager:
         self.app.download_report_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
         
         self.app.download_error_btn = tk.Button(download_frame, text=get_text(self.app.current_language, 'download_error_log'),
-                                              font=('微软雅黑', 9, 'bold'), bg=self.colors['secondary'],
+                                              font=('微软雅黑', 10, 'bold'), bg=self.colors['secondary'],
                                               fg=self.colors['white'], relief='flat',
                                               pady=8, cursor='hand2', 
                                               command=self.app.download_error_log,
@@ -524,7 +532,7 @@ class UIComponentManager:
         self.app.download_error_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(5, 5))
         
         self.app.download_upload_btn = tk.Button(download_frame, text=get_text(self.app.current_language, 'download_upload_record'),
-                                               font=('微软雅黑', 9, 'bold'), bg=self.colors['secondary'],
+                                               font=('微软雅黑', 10, 'bold'), bg=self.colors['secondary'],
                                                fg=self.colors['white'], relief='flat',
                                                pady=8, cursor='hand2', 
                                                command=self.app.download_upload_record,
@@ -546,7 +554,7 @@ class UIComponentManager:
         self.app.log_title_label.pack(side=tk.LEFT)
         
         self.app.clear_log_btn = tk.Button(log_control, text=get_text(self.app.current_language, 'clear_log'),
-                 font=('微软雅黑', 9), bg=self.colors['danger'],
+                 font=('微软雅黑', 10), bg=self.colors['danger'],
                  fg=self.colors['white'], relief='flat',
                  padx=15, pady=5, command=self.app.clear_log)
         self.app.clear_log_btn.pack(side=tk.RIGHT)
@@ -555,7 +563,7 @@ class UIComponentManager:
         log_frame = tk.Frame(log_container, bg=self.colors['white'], relief='solid', bd=1)
         log_frame.pack(fill=tk.BOTH, expand=True)
         
-        self.app.log_text = tk.Text(log_frame, font=('微软雅黑', 9), 
+        self.app.log_text = tk.Text(log_frame, font=('微软雅黑', 10), 
                                bg=self.colors['white'], fg=self.colors['dark'],
                                wrap=tk.WORD, state='disabled')
         
@@ -573,13 +581,13 @@ class UIComponentManager:
         
         self.app.status_text = tk.Label(self.app.status_bar, text=get_text(self.app.current_language, 'ready'), 
                                    bg=self.colors['light'], fg=self.colors['dark'],
-                                   font=('微软雅黑', 9))
+                                   font=('微软雅黑', 10))
         self.app.status_text.pack(side=tk.LEFT, padx=10, pady=3)
         
         # 时间显示
         self.app.time_label = tk.Label(self.app.status_bar, text="", 
                                   bg=self.colors['light'], fg=self.colors['dark'],
-                                  font=('微软雅黑', 9))
+                                  font=('微软雅黑', 10))
         self.app.time_label.pack(side=tk.RIGHT, padx=10, pady=3)
 
     def save_login_info(self):
