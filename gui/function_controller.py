@@ -177,6 +177,8 @@ class FunctionController:
                 # 获取浏览器配置
                 browser_path = getattr(self.app, 'browser_custom_path', None)
                 preferred_browser = getattr(self.app, 'browser_preferred_type', 'auto')
+                # 获取登录URL
+                login_url = self.app.login_url_var.get() if self.app.login_url_var.get().strip() else None
                 
                 result = run_with_gui_params_v2(
                     excel_path=excel_path,
@@ -187,6 +189,7 @@ class FunctionController:
                     progress_callback=self.update_progress_from_callback,
                     log_callback=self.log_message_from_callback,
                     upload_record_callback=self.add_upload_record,
+                    login_url=login_url,
                     browser_path=browser_path,
                     preferred_browser=preferred_browser
                 )

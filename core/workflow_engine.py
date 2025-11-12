@@ -170,7 +170,7 @@ def run_batch_with_reuse(playwright: Playwright, data_rows: List[Dict[str, Any]]
         browser_manager.cleanup()
 
 
-def run(playwright: Playwright, data_row=None, username=None, password=None, system_language='en') -> None:
+def run(playwright: Playwright, data_row=None, username=None, password=None, system_language='en', login_url=None) -> None:
     """
     原有的单次处理函数（保持向后兼容）
     
@@ -180,6 +180,7 @@ def run(playwright: Playwright, data_row=None, username=None, password=None, sys
         username: 用户名
         password: 密码
         system_language: 系统语言
+        login_url: 登录网址
     """
     # 检查是否提供了数据行
     if data_row is None:
@@ -234,7 +235,12 @@ def run(playwright: Playwright, data_row=None, username=None, password=None, sys
     try:
         # 登录系统
         print(f"正在使用用户 '{username}' 登录到PEDA系统...")
-        page.goto("https://frd-pim-app.emea.zf-world.com/webui/WebUI_2#deepLink=1&contextID=GL&workspaceID=Main&screen=homepage")
+        # 使用提供的登录URL，如果没有则使用默认值
+        if not login_url:
+            login_url = "https://frd-pim-app.emea.zf-world.com/webui/WebUI_2#deepLink=1&contextID=GL&workspaceID=Main&screen=homepage"
+            print("⚠️ 未提供登录URL，使用默认URL")
+        
+        page.goto(login_url)
         page.get_by_role("textbox", name="Username").click()
         page.get_by_role("textbox", name="Username").fill(username)
         page.get_by_role("textbox", name="Password").click()

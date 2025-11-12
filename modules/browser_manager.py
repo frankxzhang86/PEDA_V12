@@ -69,7 +69,11 @@ class BrowserManager:
             self.username = username
             self.password = password
             self.system_language = system_language
-            self.login_url = login_url or "https://frd-pim-app.emea.zf-world.com/webui/WebUI_2#deepLink=1&contextID=GL&workspaceID=Main&screen=homepage"
+            # 从配置文件获取登录URL，如果没有提供则使用默认值
+            if not login_url:
+                login_url = "https://frd-pim-app.emea.zf-world.com/webui/WebUI_2#deepLink=1&contextID=GL&workspaceID=Main&screen=homepage"
+                self.log("⚠️ 未提供登录URL，使用默认URL", "WARNING")
+            self.login_url = login_url
             
             # 初始化浏览器查找器
             self.browser_finder = BrowserFinder(log_callback=self.log_callback)
@@ -176,8 +180,8 @@ class BrowserManager:
             
             self.log("🔄 重置页面状态，准备处理下一个件号...")
             
-            # 导航回主页面
-            self.page.goto("https://frd-pim-app.emea.zf-world.com/webui/WebUI_2#deepLink=1&contextID=GL&workspaceID=Main&screen=homepage")
+            # 导航回主页面（使用保存的登录URL）
+            self.page.goto(self.login_url)
             
             # 等待页面加载
             self.page.wait_for_timeout(3000)
