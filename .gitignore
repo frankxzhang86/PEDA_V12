@@ -92,3 +92,19 @@ start.cpython-*.pyc
 
 # 说明：如有其它不希望打包的临时或个人文件，可继续补充
 auto_form_fill_2.py
+
+# 临时的Excel文件（备份）
+PEDA_Upload_Template*.xlsx
+*_backup.xlsx
+
+# 项目流程和说明文档（用于本地PPT制作等）
+操作流程大纲.md
+
+# 临时脚本和工具
+compress_spacing.py
+replace_relief.py
+*.tmp.py
+
+# Icon files
+IOCN.png
+icon.ico
