@@ -310,4 +310,9 @@ def enhanced_product_search(page, part_number):
     except Exception as e:
         print(f"检查搜索结果失败: {e}")
     
+    # 搜索失败，检测并处理可能的"Product Not Found"弹窗
+    print(f"⚠️ 产品 {part_number} 搜索失败，检测是否有弹窗...")
+    from .popup_handler import handle_product_not_found_popup
+    handle_product_not_found_popup(page)
+    
     return False 
