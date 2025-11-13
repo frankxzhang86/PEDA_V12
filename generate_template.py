@@ -67,13 +67,15 @@ def create_peda_upload_template():
     template_filename = "PEDA_Upload_Template.xlsx"
     
     # --- 1. 创建数据模板工作表 (Data Sheet) ---
-    # 根据新的字段要求：4个必填 + 3个选填
+    # 根据新的字段要求：4个必填 + 5个选填
     data_template = {
         "part_number": ["PN-001-A", "PN-002-B", "PN-003-C"],
         "reason": ["250", "250", "250"],
         "decision_region": ["Asia", "Europe", "Asia"],
         "decision_value": ["10", "10", "10"],
         "contact": ["Pipar Pan", "Pipar Pan", ""],
+        "external_info": ["External information 1", "External information 2", ""],
+        "internal_comment": ["Internal comment 1", "Internal comment 2", ""],
         "project_type": ["2", "2", ""],
         "sample_quantity": ["10", "20", ""]
     }
@@ -87,6 +89,8 @@ def create_peda_upload_template():
             "decision_region",
             "decision_value",
             "contact",
+            "external_info",
+            "internal_comment",
             "project_type",
             "sample_quantity"
         ],
@@ -101,6 +105,10 @@ def create_peda_upload_template():
             
             "【选填】联系人名称，如为空则使用默认值。示例：Pipar Pan",
             
+            "【选填】外部信息，可填写给外部查看的信息。如为空则留空。示例：External information",
+            
+            "【选填】内部备注，可填写内部使用的备注信息。如为空则留空。示例：Internal comment",
+            
             "【选填】项目类型，如为空则使用默认值。示例：2",
             
             "【选填】样品数量，如为空则使用默认值。示例：10"
@@ -111,6 +119,8 @@ def create_peda_upload_template():
             "Asia", 
             "10",
             "Pipar Pan",
+            "External information",
+            "Internal comment",
             "2",
             "10"
         ]
@@ -148,8 +158,10 @@ def create_peda_upload_template():
         print("  • reason - 原因代码（必填）")
         print("  • decision_region - 决策区域（必填）")
         print("  • decision_value - 决策值（必填）")
-        print("\n  【选填字段】（如为空将使用默认值）")
+        print("\n  【选填字段】（如为空将使用默认值或留空）")
         print("  • contact - 联系人（默认值：Pipar Pan）")
+        print("  • external_info - 外部信息（默认值：空）")
+        print("  • internal_comment - 内部备注（默认值：空）")
         print("  • project_type - 项目类型（默认值：2）")
         print("  • sample_quantity - 样品数量（默认值：10）")
         print("\n💡 提示：")

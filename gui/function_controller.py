@@ -118,7 +118,7 @@ class FunctionController:
             self.app.generate_folder_btn.config(state='disabled')
 
     def generate_upload_folders(self):
-        """根据合格的件号列表生成上传文件夹"""
+        """根据合格的件号列表生成上传文件夹（包含完整的子文件夹结构）"""
         if not self.qualified_part_numbers:
             messagebox.showwarning("无数据", "没有合格的件号用于创建文件夹。")
             return
@@ -128,13 +128,15 @@ class FunctionController:
             messagebox.showerror("路径无效", "请先选择一个有效的目标文件夹。")
             return
 
-        self.log_message(f"开始在 '{target_dir}' 中创建文件夹...", "INFO")
+        self.log_message(f"开始在 '{target_dir}' 中创建文件夹结构...", "INFO")
         
         created_count = 0
         skipped_count = 0
         error_count = 0
         
         try:
+            from config.constants import DOCUMENT_CATEGORIES
+            
             for part_number in self.qualified_part_numbers:
                 raw_value = str(part_number).strip()
                 safe_part_number = re.sub(r'[<>:"/\\|?*]', '_', raw_value).rstrip('. ').strip()
@@ -146,16 +148,28 @@ class FunctionController:
                 folder_path = os.path.join(target_dir, safe_part_number)
                 
                 try:
+                    # 检查主文件夹是否已存在
                     if os.path.exists(folder_path):
                         skipped_count += 1
+                        self.log_message(f"文件夹 '{safe_part_number}' 已存在，已跳过。", "INFO")
                         continue
+                    
+                    # 创建主文件夹
                     os.makedirs(folder_path, exist_ok=True)
+                    
+                    # 在主文件夹内创建6个子文件夹
+                    for category in DOCUMENT_CATEGORIES:
+                        subfolder_path = os.path.join(folder_path, category)
+                        os.makedirs(subfolder_path, exist_ok=True)
+                    
                     created_count += 1
+                    self.log_message(f"已创建 '{safe_part_number}' 及其子文件夹。", "SUCCESS")
+                    
                 except Exception as e:
                     self.log_message(f"创建文件夹 '{folder_path}' 失败: {e}", "ERROR")
                     error_count += 1
             
-            summary_message = f"文件夹创建完成。\n\n成功创建: {created_count}\n已存在/跳过: {skipped_count}\n失败: {error_count}"
+            summary_message = f"文件夹创建完成。\n\n成功创建: {created_count}（含子文件夹）\n已存在/跳过: {skipped_count}\n失败: {error_count}"
             self.log_message(summary_message, "SUCCESS")
             messagebox.showinfo("操作完成", summary_message)
 

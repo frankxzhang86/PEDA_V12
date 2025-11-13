@@ -31,11 +31,13 @@ PART_NUMBER_COLUMN = 'part_number'
 
 # Excel模板中所有可选的列名（包含必填和选填）
 ALL_COLUMNS = [
-    'part_number',      # 必填
-    'reason',           # 必填
-    'decision_region',  # 必填
-    'decision_value',   # 必填
-    'contact',          # 选填
-    'project_type',     # 选填
-    'sample_quantity'   # 选填
+    'part_number',       # 必填
+    'reason',            # 必填
+    'decision_region',   # 必填
+    'decision_value',    # 必填
+    'contact',           # 选填
+    'external_info',     # 选填
+    'internal_comment',  # 选填
+    'project_type',      # 选填
+    'sample_quantity'    # 选填
 ]

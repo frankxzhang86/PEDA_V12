@@ -379,9 +379,13 @@ class UIComponentManager:
                                      height=1, width=15)
         self.app.document_btn.pack(side=tk.RIGHT, padx=(8, 0))
         
-        # 创建文件夹按钮
+        # 创建文件夹按钮 - 与"选择文件夹"按钮相同大小，位置在正下方
         button_frame = tk.Frame(file_grid, bg=self.colors['neutral_100'])
-        button_frame.grid(row=3, column=1, sticky=tk.W, pady=(0, 0))
+        button_frame.grid(row=3, column=1, sticky=tk.W+tk.E, pady=(0, 0))
+        
+        # 左侧空白占位，使按钮对齐到右侧
+        spacer = tk.Frame(button_frame, bg=self.colors['neutral_100'])
+        spacer.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         self.app.generate_folder_btn = tk.Button(button_frame, text=get_text(self.app.current_language, 'generate_folders'),
                                      font=('微软雅黑', 10, 'bold'), bg=self.colors['info'],
