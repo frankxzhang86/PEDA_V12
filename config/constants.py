@@ -23,7 +23,8 @@ REQUIRED_COLUMNS = [
     'part_number',
     'reason',
     'decision_region',
-    'decision_value'
+    'decision_value',
+    'project_type'
 ]
 
 # Excel模板中需要保持唯一性的列
@@ -35,9 +36,9 @@ ALL_COLUMNS = [
     'reason',            # 必填
     'decision_region',   # 必填
     'decision_value',    # 必填
+    'project_type',      # 必填
     'contact',           # 选填
     'external_info',     # 选填
     'internal_comment',  # 选填
-    'project_type',      # 选填
     'sample_quantity'    # 选填
 ]

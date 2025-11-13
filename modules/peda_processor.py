@@ -39,11 +39,13 @@ def process_single_peda(page: Page, data_row: Dict[str, Any],
         reason = data_row.get('reason', '')
         decision_region = data_row.get('decision_region', '')
         decision_value = data_row.get('decision_value', '')
+        project_type = data_row.get('project_type', '')
         
-        # 选填字段（提供默认值）
-        contact = data_row.get('contact', 'Pipar Pan')
-        project_type = data_row.get('project_type', '2')
-        sample_quantity = data_row.get('sample_quantity', '10')
+        # 选填字段（默认为空）
+        contact = data_row.get('contact', '')
+        sample_quantity = data_row.get('sample_quantity', '')
+        external_info = data_row.get('external_info', '')
+        internal_comment = data_row.get('internal_comment', '')
         
         if not part_number:
             log("❌ 件号为空，跳过处理", "ERROR")
@@ -185,9 +187,9 @@ def validate_data_row(data_row: Dict[str, Any]) -> bool:
     Returns:
         bool: 数据有效返回True
     """
-    # 只验证4个必填字段
+    # 验证5个必填字段
     required_fields = [
-        'part_number', 'reason', 'decision_region', 'decision_value'
+        'part_number', 'reason', 'decision_region', 'decision_value', 'project_type'
     ]
     
     for field in required_fields:
@@ -207,25 +209,29 @@ def prepare_data_row(data_row: Dict[str, Any]) -> Dict[str, Any]:
     Returns:
         Dict: 处理后的数据行
     """
+    import pandas as pd
     processed_row = data_row.copy()
     
     # 确保必填字段为字符串格式
-    required_fields = ['part_number', 'reason', 'decision_region', 'decision_value']
+    required_fields = ['part_number', 'reason', 'decision_region', 'decision_value', 'project_type']
     for field in required_fields:
         if field in processed_row:
             processed_row[field] = str(processed_row[field]).strip()
     
-    # 选填字段，提供默认值
+    # 选填字段，默认为空字符串（有值就填，无值就跳过）
     optional_defaults = {
-        'contact': 'Pipar Pan',
-        'project_type': '2',
-        'sample_quantity': '10'
+        'contact': '',
+        'sample_quantity': '',
+        'external_info': '',
+        'internal_comment': ''
     }
     
     for field, default_value in optional_defaults.items():
-        if field not in processed_row or not str(processed_row[field]).strip():
+        value = processed_row.get(field)
+        # 检查是否为 NaN 或空值
+        if pd.isna(value) or not str(value).strip():
             processed_row[field] = default_value
         else:
-            processed_row[field] = str(processed_row[field]).strip()
+            processed_row[field] = str(value).strip()
     
     return processed_row

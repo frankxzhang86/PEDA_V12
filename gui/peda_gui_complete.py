@@ -273,13 +273,6 @@ class PEDAAutomationGUI:
     def download_template_file(self):
         """下载Excel模板文件"""
         try:
-            # 获取当前脚本所在的绝对路径
-            source_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'TEST', 'PEDA_Upload_Template.xlsx'))
-            
-            if not os.path.exists(source_path):
-                messagebox.showerror("错误", "模板文件 'TEST/PEDA_Upload_Template.xlsx' 不存在。")
-                return
-
             # 弹出文件保存对话框
             dest_path = filedialog.asksaveasfilename(
                 defaultextension=".xlsx",
@@ -289,11 +282,17 @@ class PEDAAutomationGUI:
             )
 
             if dest_path:
-                import shutil
-                shutil.copy(source_path, dest_path)
-                messagebox.showinfo("成功", f"模板文件已成功保存到:\n{dest_path}")
+                # 导入模板生成函数
+                import sys
+                import os
+                sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+                from generate_template import create_peda_upload_template
+                
+                # 生成模板到指定路径
+                create_peda_upload_template(dest_path)
+                messagebox.showinfo("成功", f"模板文件已成功生成并保存到:\n{dest_path}")
         except Exception as e:
-            messagebox.showerror("错误", f"下载模板文件失败: {e}")
+            messagebox.showerror("错误", f"生成模板文件失败: {e}")
     
     # 语言切换方法
     def switch_language(self, lang):

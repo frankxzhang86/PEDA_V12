@@ -44,21 +44,17 @@ def handle_pdf_final(page: Page, part_number: str, save_dir: str) -> bool:
         )
         response.raise_for_status()
 
-        # 检查响应头，确认是PDF文件
-        content_type = response.headers.get('Content-Type', '')
-        if 'application/pdf' in content_type:
-            # 将响应内容写入文件
-            with open(full_file_path, 'wb') as f:
-                f.write(response.content)
-            
-            if full_file_path.exists() and full_file_path.stat().st_size > 100:
-                print(f"✅ 原始PDF文件已成功下载到: {full_file_path}")
-                return True
-            else:
-                print("❌ 文件写入失败或文件为空")
-                return False
+        # 先尝试保存文件
+        with open(full_file_path, 'wb') as f:
+            f.write(response.content)
+        
+        # 检查文件是否成功保存且大小合理
+        if full_file_path.exists() and full_file_path.stat().st_size > 100:
+            print(f"✅ PDF文件已成功下载到: {full_file_path}")
+            print(f"   文件大小: {full_file_path.stat().st_size} 字节")
+            return True
         else:
-            print(f"❌ 响应内容不是PDF (Content-Type: {content_type})")
+            print("❌ 文件写入失败或文件为空")
             return False
 
     except Exception as e:

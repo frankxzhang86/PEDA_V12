@@ -4,7 +4,7 @@ import pandas as pd
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-MANDATORY_FIELDS = {"part_number", "reason", "decision_region", "decision_value"}
+MANDATORY_FIELDS = {"part_number", "reason", "decision_region", "decision_value", "project_type"}
 
 
 def autofit_columns(sheet, minimum=12, maximum=60, padding=2):
@@ -47,7 +47,7 @@ def style_data_sheet(sheet):
     mandatory_fill = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")
     optional_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
     header_font = Font(bold=True, color="000000")
-    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=False)
 
     for cell in sheet[1]:
         is_mandatory = str(cell.value) in MANDATORY_FIELDS
@@ -56,27 +56,33 @@ def style_data_sheet(sheet):
         cell.alignment = header_alignment
 
     sheet.freeze_panes = "A2"
-    autofit_columns(sheet, minimum=15, maximum=50)
+    autofit_columns(sheet, minimum=18, maximum=80)
 
 
-def create_peda_upload_template():
+def create_peda_upload_template(output_path=None):
     """
     生成 PEDA V12 的 Excel 上传模板文件。
     该文件包含一个数据输入表和一个使用说明表。
+    
+    Args:
+        output_path: 可选，指定输出文件的完整路径。如果未指定，则保存到当前目录
     """
-    template_filename = "PEDA_Upload_Template.xlsx"
+    if output_path is None:
+        template_filename = "PEDA_Upload_Template.xlsx"
+    else:
+        template_filename = output_path
     
     # --- 1. 创建数据模板工作表 (Data Sheet) ---
-    # 根据新的字段要求：4个必填 + 5个选填
+    # 根据新的字段要求：5个必填 + 4个选填
     data_template = {
         "part_number": ["PN-001-A", "PN-002-B", "PN-003-C"],
         "reason": ["250", "250", "250"],
         "decision_region": ["Asia", "Europe", "Asia"],
         "decision_value": ["10", "10", "10"],
+        "project_type": ["2", "2", "2"],
         "contact": ["Pipar Pan", "Pipar Pan", ""],
         "external_info": ["External information 1", "External information 2", ""],
         "internal_comment": ["Internal comment 1", "Internal comment 2", ""],
-        "project_type": ["2", "2", ""],
         "sample_quantity": ["10", "20", ""]
     }
     df_template = pd.DataFrame(data_template)
@@ -88,10 +94,10 @@ def create_peda_upload_template():
             "reason", 
             "decision_region",
             "decision_value",
+            "project_type",
             "contact",
             "external_info",
             "internal_comment",
-            "project_type",
             "sample_quantity"
         ],
         "说明 (Description)": [
@@ -103,13 +109,13 @@ def create_peda_upload_template():
             
             "【必填】决策值，整数。示例：10",
             
+            "【必填】项目类型。示例：2",
+            
             "【选填】联系人名称，如为空则使用默认值。示例：Pipar Pan",
             
             "【选填】外部信息，可填写给外部查看的信息。如为空则留空。示例：External information",
             
             "【选填】内部备注，可填写内部使用的备注信息。如为空则留空。示例：Internal comment",
-            
-            "【选填】项目类型，如为空则使用默认值。示例：2",
             
             "【选填】样品数量，如为空则使用默认值。示例：10"
         ],
@@ -118,10 +124,10 @@ def create_peda_upload_template():
             "250",
             "Asia", 
             "10",
+            "2",
             "Pipar Pan",
             "External information",
             "Internal comment",
-            "2",
             "10"
         ]
     }
@@ -144,42 +150,48 @@ def create_peda_upload_template():
             style_instruction_sheet(instructions_sheet)
             style_data_sheet(data_sheet)
         
-        print("=" * 60)
-        print("✅ 成功！PEDA V12 上传模板文件已创建")
-        print("=" * 60)
-        print(f"📄 文件名：{template_filename}")
-        print(f"📁 完整路径：{os.path.abspath(template_filename)}")
-        print("\n📊 文件包含以下工作表：")
-        print("  1. PEDA Upload Data - 数据输入工作表（包含3行示例数据）")
-        print("  2. Instructions - 使用说明工作表（详细字段说明）")
-        print("\n📋 Excel 期待的列（字段）：")
-        print("  【必填字段】")
-        print("  • part_number - 产品料号（必填）")
-        print("  • reason - 原因代码（必填）")
-        print("  • decision_region - 决策区域（必填）")
-        print("  • decision_value - 决策值（必填）")
-        print("\n  【选填字段】（如为空将使用默认值或留空）")
-        print("  • contact - 联系人（默认值：Pipar Pan）")
-        print("  • external_info - 外部信息（默认值：空）")
-        print("  • internal_comment - 内部备注（默认值：空）")
-        print("  • project_type - 项目类型（默认值：2）")
-        print("  • sample_quantity - 样品数量（默认值：10）")
-        print("\n💡 提示：")
-        print("  • 请在 'PEDA Upload Data' 工作表中填写您的数据")
-        print("  • 文档主目录路径请在GUI主页设置，不再从Excel读取")
-        print("=" * 60)
+        # 只在命令行运行时打印详细信息
+        if output_path is None:
+            print("=" * 60)
+            print("✅ 成功！PEDA V12 上传模板文件已创建")
+            print("=" * 60)
+            print(f"📄 文件名：{template_filename}")
+            print(f"📁 完整路径：{os.path.abspath(template_filename)}")
+            print("\n📊 文件包含以下工作表：")
+            print("  1. PEDA Upload Data - 数据输入工作表（包含3行示例数据）")
+            print("  2. Instructions - 使用说明工作表（详细字段说明）")
+            print("\n📋 Excel 期待的列（字段）：")
+            print("  【必填字段】")
+            print("  • part_number - 产品料号（必填）")
+            print("  • reason - 原因代码（必填）")
+            print("  • decision_region - 决策区域（必填）")
+            print("  • decision_value - 决策值（必填）")
+            print("  • project_type - 项目类型（必填）")
+            print("\n  【选填字段】（如为空将使用默认值或留空）")
+            print("  • contact - 联系人（默认值：Pipar Pan）")
+            print("  • external_info - 外部信息（默认值：空）")
+            print("  • internal_comment - 内部备注（默认值：空）")
+            print("  • sample_quantity - 样品数量（默认值：10）")
+            print("\n💡 提示：")
+            print("  • 请在 'PEDA Upload Data' 工作表中填写您的数据")
+            print("  • 文档主目录路径请在GUI主页设置，不再从Excel读取")
+            print("=" * 60)
+        
+        return True
         
     except Exception as e:
-        print("=" * 60)
-        print("❌ 创建模板文件失败")
-        print("=" * 60)
-        print(f"错误信息：{e}")
-        print("\n请确保：")
-        print("  1. 已安装必要的库：pip install pandas openpyxl")
-        print("  2. 当前目录有写入权限")
-        print("  3. 文件未被其他程序打开")
-        print("  4. PEDA_Upload_Template.xlsx 文件不存在或未被占用")
-        print("=" * 60)
+        if output_path is None:
+            print("=" * 60)
+            print("❌ 创建模板文件失败")
+            print("=" * 60)
+            print(f"错误信息：{e}")
+            print("\n请确保：")
+            print("  1. 已安装必要的库：pip install pandas openpyxl")
+            print("  2. 当前目录有写入权限")
+            print("  3. 文件未被其他程序打开")
+            print("  4. PEDA_Upload_Template.xlsx 文件不存在或未被占用")
+            print("=" * 60)
+        raise
 
 if __name__ == "__main__":
     create_peda_upload_template()

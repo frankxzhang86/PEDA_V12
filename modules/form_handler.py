@@ -21,71 +21,86 @@ def fill_peda_form(page, data_row):
             print(f"切换到PEDA Detail页异常: {e}")
         
         # 提取数据并确保所有值都是字符串类型
-        contact = data_row.get('contact', 'Pipar Pan')
+        contact = data_row.get('contact', '')
         project_type = str(data_row.get('project_type', '2'))  # 确保是字符串
         reason = str(data_row.get('reason', '250'))  # 确保是字符串
-        sample_quantity = str(data_row.get('sample_quantity', '10'))  # 确保是字符串
+        sample_quantity = data_row.get('sample_quantity', '')
         decision_region = data_row.get('decision_region', 'Asia')
         decision_value = str(data_row.get('decision_value', '10'))  # 确保是字符串
 
         import pandas as pd
-        # 新增调试日志，打印所有字段内容
-        # external_info = data_row.get('external_info', '')
+        # 清理 NaN 值
         external_info = data_row.get('external_info', '')
         if pd.isna(external_info):
             external_info = ''
         else:
             external_info = str(external_info).strip()
 
-        # internal_comment = data_row.get('internal_comment', '')
         internal_comment = data_row.get('internal_comment', '')
         if pd.isna(internal_comment):
             internal_comment = ''
         else:
             internal_comment = str(internal_comment).strip()
+            
+        # 清理 contact 和 sample_quantity 的 NaN
+        if pd.isna(contact):
+            contact = ''
+        else:
+            contact = str(contact).strip()
+            
+        if pd.isna(sample_quantity):
+            sample_quantity = ''
+        else:
+            sample_quantity = str(sample_quantity).strip()
         # print("[调试] data_row keys:", list(data_row.keys()))
         # print(f"[调试] external_info: '{external_info}' | internal_comment: '{internal_comment}'")
         # print("开始填写PEDA表单 (英语界面)...")
         # print(f"表单数据: contact={contact}, project_type={project_type}, reason={reason}")
         # print(f"样品数量: {sample_quantity}, 决策区域: {decision_region}, 决策值: {decision_value}")
         
-        # 填写联系人
+        # 填写联系人（选填，有值才填）
         try:
-            contact_field = page.locator("#Contact").get_by_role("combobox")
-            contact_field.select_option(contact)
-            # 触发change事件确保表单检测到变更
-            contact_field.dispatch_event("change")
-            page.wait_for_timeout(500)
-            print(f"✅ 联系人填写成功: {contact}")
+            if contact:  # 只在有值时填写
+                contact_field = page.locator("#Contact").get_by_role("combobox")
+                contact_field.select_option(contact)
+                # 触发change事件确保表单检测到变更
+                contact_field.dispatch_event("change")
+                page.wait_for_timeout(500)
+                print(f"✅ 联系人填写成功: {contact}")
+            else:
+                print("⏭️ 联系人为空，跳过填写")
         except Exception as e:
-            print(f"❌ 联系人填写失败: {e}")
-            raise
+            print(f"⚠️ 联系人填写失败（选填项，继续执行）: {e}")
 
-        # 填写 External Info
+        # 填写 External Info（选填，有值才填）
         try:
-            external_info_field = page.locator("#External_Info textarea")
-            external_info_field.wait_for(state="visible", timeout=10000)
-            external_info_field.fill(external_info)
-            external_info_field.dispatch_event("input")
-            external_info_field.dispatch_event("change")
-            page.wait_for_timeout(500)
-            print(f"✅ External Info 填写成功: {external_info}")
+            if external_info:  # 只在有值时填写
+                external_info_field = page.locator("#External_Info textarea")
+                external_info_field.wait_for(state="visible", timeout=3000)
+                external_info_field.fill(external_info)
+                external_info_field.dispatch_event("input")
+                external_info_field.dispatch_event("change")
+                page.wait_for_timeout(500)
+                print(f"✅ External Info 填写成功: {external_info}")
+            else:
+                print("⏭️ External Info 为空，跳过填写")
         except Exception as e:
-            print(f"❌ External Info 填写失败: {e}")
-            raise
+            print(f"⚠️ External Info 填写失败（选填项，继续执行）: {e}")
 
-        # 填写 Internal Comment
+        # 填写 Internal Comment（选填，有值才填）
         try:
-            internal_comment_field = page.locator("#Internal_Comment textarea")
-            internal_comment_field.wait_for(state="visible", timeout=10000)
-            internal_comment_field.fill(internal_comment)
-            internal_comment_field.dispatch_event("input")
-            internal_comment_field.dispatch_event("change")
-            page.wait_for_timeout(500)
-            print(f"✅ Internal Comment 填写成功: {internal_comment}")
+            if internal_comment:  # 只在有值时填写
+                internal_comment_field = page.locator("#Internal_Comment textarea")
+                internal_comment_field.wait_for(state="visible", timeout=3000)
+                internal_comment_field.fill(internal_comment)
+                internal_comment_field.dispatch_event("input")
+                internal_comment_field.dispatch_event("change")
+                page.wait_for_timeout(500)
+                print(f"✅ Internal Comment 填写成功: {internal_comment}")
+            else:
+                print("⏭️ Internal Comment 为空，跳过填写")
         except Exception as e:
-            print(f"❌ Internal Comment 填写失败: {e}")
-            raise
+            print(f"⚠️ Internal Comment 填写失败（选填项，继续执行）: {e}")
         
         # 填写项目类型
         try:
@@ -111,18 +126,20 @@ def fill_peda_form(page, data_row):
             print(f"❌ 原因填写失败: {e}")
             raise
         
-        # 填写样品数量
+        # 填写样品数量（选填，有值才填）
         try:
-            quantity_field = page.locator(".gwt-TextBox.validator-number")
-            quantity_field.fill(sample_quantity)
-            # 触发input和change事件
-            quantity_field.dispatch_event("input")
-            quantity_field.dispatch_event("change")
-            page.wait_for_timeout(500)
-            print(f"✅ 样品数量填写成功: {sample_quantity}")
+            if sample_quantity:  # 只在有值时填写
+                quantity_field = page.locator(".gwt-TextBox.validator-number")
+                quantity_field.fill(sample_quantity)
+                # 触发input和change事件
+                quantity_field.dispatch_event("input")
+                quantity_field.dispatch_event("change")
+                page.wait_for_timeout(500)
+                print(f"✅ 样品数量填写成功: {sample_quantity}")
+            else:
+                print("⏭️ 样品数量为空，跳过填写")
         except Exception as e:
-            print(f"❌ 样品数量填写失败: {e}")
-            raise
+            print(f"⚠️ 样品数量填写失败（选填项，继续执行）: {e}")
         
         # 填写决策值
         try:
