@@ -104,7 +104,3 @@ PEDA_Upload_Template*.xlsx
 compress_spacing.py
 replace_relief.py
 *.tmp.py
-
-# Icon files
-IOCN.png
-icon.ico
