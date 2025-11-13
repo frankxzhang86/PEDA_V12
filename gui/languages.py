@@ -22,8 +22,8 @@ LANGUAGES = {
         'file_selection': '📁 File Selection',
         'excel_file': 'Excel File:',
         'document_path': 'Document Path:',
-        'choose_file': '📄 Choose File...',
-        'choose_folder': '📁 Choose Folder...',
+        'choose_file': '📄 Choose File',
+        'choose_folder': '📁 Choose Path',
         'generate_folders': '📁 Generate Folders',
         'system_settings': '🌐 System Settings',
         'ui_language': 'UI Language:',
@@ -69,9 +69,11 @@ LANGUAGES = {
         'instructions_op_content': """
 1. Login: Enter the URL, username, and password, then click 'Save' to store the credentials.
 2. File Selection: Click 'Choose File' to select the Excel file and 'Choose Folder' to select the document directory.
-3. Start: Click 'Start' to begin the automated processing.
-4. Stop/Reset: 'Stop' halts the current process, and 'Reset' clears all progress and statistics.
-5. Reports: After processing, you can download various reports for records.
+3. Generate Folders: After selecting the Excel file and document directory, click 'Generate Folders' to automatically create the required folder structure for each part number based on the Excel data. This will create sub-folders (Confidential, Image Documentation, Measurement Report, Other, Technical Datasheet, Technical Drawing) under each part number folder.
+4. Headless Mode: Check the 'Headless Mode' option to run the browser in the background without displaying the browser window. This can improve performance and reduce visual distractions. Uncheck it if you want to observe the browser automation process.
+5. Start: Click 'Start' to begin the automated processing.
+6. Stop/Reset: 'Stop' halts the current process, and 'Reset' clears all progress and statistics.
+7. Reports: After processing, you can download various reports for records.
 """,
         'instructions_excel_title': '2. Excel Upload Instructions',
         'instructions_excel_content': """
@@ -85,8 +87,8 @@ Please download the template to see the required format.
 2. Each sub-folder should be named with the 'Part Number' from the Excel file.
 3. Inside each 'Part Number' folder, create sub-folders for different document types as shown below:
 
-TEST/
-└───[Part Number]/
+PEDA DOCUMENTS/
+└───[PART NUMBER]/
     ├───Confidential/
     ├───Image Documentation/
     ├───Measurement Report/
@@ -112,8 +114,8 @@ TEST/
         'file_selection': '📁 Dateiauswahl',
         'excel_file': 'Excel-Datei:',
         'document_path': 'Dokumentenpfad:',
-        'choose_file': '📄 Datei wählen...',
-        'choose_folder': '📁 Ordner wählen...',
+        'choose_file': '📄 Datei wählen',
+        'choose_folder': '📁 Pfad wählen',
         'generate_folders': '📁 Ordner erstellen',
         'system_settings': '🌐 Systemeinstellungen',
         'ui_language': 'Oberflächensprache:',
@@ -159,9 +161,11 @@ TEST/
         'instructions_op_content': """
 1. Anmelden: Geben Sie die URL, den Benutzernamen und das Passwort ein und klicken Sie auf "Speichern", um die Anmeldeinformationen zu sichern.
 2. Dateiauswahl: Klicken Sie auf "Datei wählen", um die Excel-Datei auszuwählen, und auf "Ordner wählen", um das Dokumentenverzeichnis auszuwählen.
-3. Start: Klicken Sie auf "Start", um die automatische Verarbeitung zu beginnen.
-4. Stopp/Zurücksetzen: "Stopp" hält den aktuellen Prozess an, und "Zurücksetzen" löscht den gesamten Fortschritt und die Statistiken.
-5. Berichte: Nach der Verarbeitung können Sie verschiedene Berichte für Ihre Unterlagen herunterladen.
+3. Ordner erstellen: Nachdem Sie die Excel-Datei und das Dokumentenverzeichnis ausgewählt haben, klicken Sie auf "Ordner erstellen", um automatisch die erforderliche Ordnerstruktur für jede Teilenummer basierend auf den Excel-Daten zu erstellen. Dies erstellt Unterordner (Confidential, Image Documentation, Measurement Report, Other, Technical Datasheet, Technical Drawing) unter jedem Teilenummer-Ordner.
+4. Headless-Modus: Aktivieren Sie die Option "Headless-Modus", um den Browser im Hintergrund ohne Anzeige des Browserfensters auszuführen. Dies kann die Leistung verbessern und visuelle Ablenkungen reduzieren. Deaktivieren Sie es, wenn Sie den Browser-Automatisierungsprozess beobachten möchten.
+5. Start: Klicken Sie auf "Start", um die automatische Verarbeitung zu beginnen.
+6. Stopp/Zurücksetzen: "Stopp" hält den aktuellen Prozess an, und "Zurücksetzen" löscht den gesamten Fortschritt und die Statistiken.
+7. Berichte: Nach der Verarbeitung können Sie verschiedene Berichte für Ihre Unterlagen herunterladen.
 """,
         'instructions_excel_title': '2. Anleitung zum Hochladen von Excel-Dateien',
         'instructions_excel_content': """
@@ -172,11 +176,11 @@ Bitte laden Sie die Vorlage herunter, um das erforderliche Format zu sehen.
         'instructions_dir_title': '3. Anforderungen an die Dokumentenverzeichnisstruktur',
         'instructions_dir_content': """
 1. Das Dokumentenverzeichnis muss einer bestimmten Struktur folgen.
-2. Jeder Unterordner sollte mit der 'Part Number' aus der Excel-Datei benannt sein.
-3. Innerhalb jedes 'Part Number'-Ordners erstellen Sie Unterordner für verschiedene Dokumenttypen, wie unten gezeigt:
+2. Jeder Unterordner sollte mit der 'PART NUMBER' aus der Excel-Datei benannt sein.
+3. Innerhalb jedes 'PART NUMBER'-Ordners erstellen Sie Unterordner für verschiedene Dokumenttypen, wie unten gezeigt:
 
-TEST/
-└───[Part Number]/
+PEDA DOCUMENTS/
+└───[PART NUMBER]/
     ├───Confidential/
     ├───Image Documentation/
     ├───Measurement Report/
@@ -202,8 +206,8 @@ TEST/
         'file_selection': '📁 文件选择',
         'excel_file': 'Excel文件:',
         'document_path': '文档路径:',
-        'choose_file': '📄 选择文件...',
-        'choose_folder': '📁 选择文件夹...',
+        'choose_file': '📄 选择文件',
+        'choose_folder': '📁 选择路径',
         'generate_folders': '📁 生成文件夹',
         'system_settings': '🌐 系统设置',
         'ui_language': '界面语言:',
@@ -247,11 +251,13 @@ TEST/
         'instructions_title': '📖 使用手册',
         'instructions_op_title': '1. 操作说明',
         'instructions_op_content': """
-1. 登录：输入网址、用户名和密码，点击“保存”以存储凭据。
-2. 文件选择：点击“选择文件”选择Excel文件，点击“选择文件夹”选择文档目录。
-3. 开始：点击“开始”以启动自动化处理。
-4. 停止/重置：“停止”会暂停当前进程，“重置”会清除所有进度和统计信息。
-5. 报告：处理完成后，您可以下载各种报告以供记录。
+1. 登录：输入网址、用户名和密码，点击"保存"以存储凭据。
+2. 文件选择：点击"选择文件"选择Excel文件，点击"选择文件夹"选择文档目录。
+3. 生成文件夹：选择Excel文件和文档目录后，点击"生成文件夹"按钮，系统会根据Excel中的件号数据，自动创建所需的文件夹结构。程序会为每个件号创建子文件夹（Confidential、Image Documentation、Measurement Report、Other、Technical Datasheet、Technical Drawing）。
+4. Headless模式：勾选"Headless模式"选项，浏览器将在后台运行，不显示浏览器窗口。这可以提高性能并减少视觉干扰。如果您想观察浏览器自动化过程，请取消勾选。
+5. 开始：点击"开始"以启动自动化处理。
+6. 停止/重置："停止"会暂停当前进程，"重置"会清除所有进度和统计信息。
+7. 报告：处理完成后，您可以下载各种报告以供记录。
 """,
         'instructions_excel_title': '2. 上传表格说明',
         'instructions_excel_content': """
@@ -262,11 +268,11 @@ Excel文件必须包含特定列，以便程序正确读取。
         'instructions_dir_title': '3. 上传文档的目录结构要求',
         'instructions_dir_content': """
 1. 文档目录必须遵循特定的结构。
-2. 每个子文件夹都应以Excel文件中的“零件号”命名。
-3. 在每个“零件号”文件夹内，为不同的文档类型创建子文件夹，如下所示：
+2. 每个子文件夹都应以Excel文件中的"PART NUMBER"命名。
+3. 在每个"PART NUMBER"文件夹内，为不同的文档类型创建子文件夹，如下所示：
 
-TEST/
-└───[零件号]/
+PEDA DOCUMENTS/
+└───[PART NUMBER]/
     ├───Confidential/
     ├───Image Documentation/
     ├───Measurement Report/
