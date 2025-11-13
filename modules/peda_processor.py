@@ -76,6 +76,18 @@ def process_single_peda(page: Page, data_row: Dict[str, Any],
         # 步骤2: 创建PEDA
         log("创建新的PEDA...")
         try:
+            # 等待more_horiz按钮出现（确保页面加载完成）
+            page.get_by_role("button", name="more_horiz").wait_for(state="visible", timeout=10000)
+            
+            # 检查THP审批状态
+            from .approval_checker import check_thp_approval_status
+            if not check_thp_approval_status(page, part_number):
+                log(f"⚠️ 件号 {part_number} 的THP未批准，跳过处理", "WARNING")
+                return False
+            
+            log("✅ THP审批状态检查通过")
+            
+            # 点击创建PEDA
             page.get_by_role("button", name="more_horiz").click()
             page.get_by_role("button", name="Create new PEDA").click()
             
