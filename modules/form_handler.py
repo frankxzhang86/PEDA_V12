@@ -365,7 +365,7 @@ def save_and_validate_peda(page, part_number: str = None, document_manager = Non
         
         # 第四步：等待验证完成和页面跳转
         print("4. 等待PEDA验证完成和页面跳转...")
-        page.wait_for_timeout(5000)  # 等待验证过程和页面跳转
+        page.wait_for_timeout(8000)  # 等待验证过程和页面跳转
         
         # 第五步：点击Cover Sheet标签
         print("5. 点击Cover Sheet标签...")

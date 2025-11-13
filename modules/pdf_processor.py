@@ -80,7 +80,7 @@ def find_and_navigate_to_pdf(page: Page) -> bool:
         
         # 简单等待页面加载
         print("等待页面加载...")
-        page.wait_for_timeout(3000)
+        page.wait_for_timeout(8000)
         print("✅ 页面加载完成，准备交由Final模块处理")
         return True
         
