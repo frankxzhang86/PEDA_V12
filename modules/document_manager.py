@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Callable
 
 # 导入配置常量
 from config.constants import DOCUMENT_CATEGORIES, FILE_TYPE_FILTERS
@@ -110,7 +110,7 @@ class DocumentManager:
         }
 
 
-def process_document_upload(page, document_manager: DocumentManager, part_number: str = None, data_row = None, upload_record_callback=None) -> Dict:
+def process_document_upload(page, document_manager: DocumentManager, part_number: str = None, data_row = None, upload_record_callback=None, log_callback: Optional[Callable] = None) -> Dict:
     """处理文档上传的主要逻辑，支持上传记录回调"""
     upload_results = {
         "success_count": 0,
@@ -163,7 +163,7 @@ def process_document_upload(page, document_manager: DocumentManager, part_number
         
         # 导入表单处理模块（这里使用动态导入避免循环依赖）
         from modules.form_handler import save_and_validate_peda
-        save_and_validate_success = save_and_validate_peda(page, part_number, document_manager, data_row)
+        save_and_validate_success = save_and_validate_peda(page, part_number, document_manager, data_row, log_callback=log_callback)
         upload_results['save_and_validate'] = save_and_validate_success
         upload_results['pdf_saved'] = save_and_validate_success
     else:

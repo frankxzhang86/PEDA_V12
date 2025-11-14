@@ -6,7 +6,6 @@ from typing import Dict, Any, Optional, Callable
 from .document_manager import DocumentManager, process_document_upload
 from .system_handler import enhanced_product_search
 from .form_handler import fill_peda_form
-from .pdf_processor import print_coversheet_pdf_v12
 
 
 def process_single_peda(page: Page, data_row: Dict[str, Any], 
@@ -118,7 +117,7 @@ def process_single_peda(page: Page, data_row: Dict[str, Any],
         
         # 步骤4: 文档上传
         log("开始文档上传流程...")
-        upload_results = process_document_upload(page, doc_manager, part_number, data_row, upload_record_callback=upload_record_callback)
+        upload_results = process_document_upload(page, doc_manager, part_number, data_row, upload_record_callback=upload_record_callback, log_callback=log_callback)
         
         # 显示上传结果
         log("\n=== 文档上传完成 ===")
@@ -135,14 +134,7 @@ def process_single_peda(page: Page, data_row: Dict[str, Any],
         # 显示保存和验证结果
         if upload_results.get('save_and_validate'):
             log("✅ PEDA保存、验证和Cover Sheet跳转成功", "SUCCESS")
-            # === 新增：Cover Sheet PDF 导出 ===
-            save_dir = os.path.join(document_maintenance_path, part_number)
-            log(f"=== 开始为 {part_number} 导出Cover Sheet PDF ===")
-            pdf_success = print_coversheet_pdf_v12(page, part_number, save_dir)
-            if pdf_success:
-                log(f"✅ {part_number} 的Cover Sheet PDF导出成功", "SUCCESS")
-            else:
-                log(f"❌ {part_number} 的Cover Sheet PDF导出失败", "ERROR")
+            # PDF 导出与日志已在 save_and_validate_peda 内统一处理
         else:
             log("❌ PEDA保存、验证或Cover Sheet跳转失败或被跳过", "ERROR")
             if upload_results['failed_count'] > 0:
