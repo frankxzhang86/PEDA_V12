@@ -210,7 +210,9 @@ def fill_peda_form(page, data_row):
         print(f"详细错误信息: {traceback.format_exc()}")
         return False
 
-def save_and_validate_peda(page, part_number: str = None, document_manager = None, data_row = None) -> bool:
+from typing import Optional, Callable
+
+def save_and_validate_peda(page, part_number: str = None, document_manager = None, data_row = None, log_callback: Optional[Callable] = None) -> bool:
     """保存PEDA、验证并跳转到Cover Sheet"""
     try:
         print("\n=== 开始保存、验证和跳转到Cover Sheet ===")
@@ -423,6 +425,11 @@ def save_and_validate_peda(page, part_number: str = None, document_manager = Non
         # 新增：自动导出Cover Sheet PDF
         if part_number:
             print(f"\n=== 开始为 {part_number} 导出Cover Sheet PDF ===")
+            if log_callback:
+                try:
+                    log_callback(f"=== 开始为 {part_number} 导出Cover Sheet PDF ===", "INFO")
+                except Exception:
+                    pass
             
             # 修改：使用件号文件夹作为PDF保存目录，而不是单独的PDF_Downloads文件夹
             if document_manager and hasattr(document_manager, 'part_folder'):
@@ -443,11 +450,21 @@ def save_and_validate_peda(page, part_number: str = None, document_manager = Non
             
             # 调用PDF打印功能
             pdf_success = print_coversheet_pdf_v12(page, part_number, pdf_save_dir)
-            
+
             if pdf_success:
                 print(f"✅ {part_number} 的Cover Sheet PDF导出成功")
+                if log_callback:
+                    try:
+                        log_callback(f"✅ {part_number} 的Cover Sheet PDF导出成功", "SUCCESS")
+                    except Exception:
+                        pass
             else:
                 print(f"❌ {part_number} 的Cover Sheet PDF导出失败")
+                if log_callback:
+                    try:
+                        log_callback(f"❌ {part_number} 的Cover Sheet PDF导出失败", "ERROR")
+                    except Exception:
+                        pass
                 # 不让PDF导出失败影响整个流程
         
         return True
