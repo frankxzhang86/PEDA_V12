@@ -288,6 +288,18 @@ def upload_category_files(page, category: str, files: List[str], part_number=Non
     return result
 
 
+def _wait_for_overlay_gone(page, timeout: int = 30000):
+    """等待页面加载遮罩（waitScreenOverlay）完全消失后再继续操作"""
+    try:
+        page.wait_for_selector(
+            "#waitScreenOverlayGlass, .waitscreenoverlayglass, #waitScreenOverlay",
+            state="hidden",
+            timeout=timeout
+        )
+    except Exception:
+        pass  # 遮罩不存在或已消失，忽略
+
+
 def upload_single_file(page, category: str, file_path: str) -> bool:
     """上传单个文件到指定类别"""
     try:
@@ -295,7 +307,10 @@ def upload_single_file(page, category: str, file_path: str) -> bool:
         
         # 转换类别名称为ID格式
         category_id = category.replace(" ", "_")
-        
+
+        # 等待页面加载遮罩消失，避免遮罩拦截点击
+        _wait_for_overlay_gone(page)
+
         # 快速滚动到目标区域（增加等待时间）
         try:
             page.locator(f"#{category_id}").scroll_into_view_if_needed()
@@ -377,9 +392,9 @@ def upload_single_file(page, category: str, file_path: str) -> bool:
                 print("✅ 已点击Insert按钮")
         except:
             pass  # Insert按钮可能不存在，继续
-        
-        # 增加上传完成等待时间（特别是大文件）
-        page.wait_for_timeout(1500)  # 增加到1.5秒
+
+        # 等待上传后遮罩消失（替代固定等待，确保下次操作不被拦截）
+        _wait_for_overlay_gone(page)
         return True
             
     except Exception as e:
