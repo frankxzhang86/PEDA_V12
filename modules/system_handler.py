@@ -220,70 +220,34 @@ def enhanced_product_search(page, part_number):
     # 步骤4: 等待搜索建议出现
     print(f"等待 {part_number} 的搜索建议...")
     page.wait_for_timeout(3000)  # 等待3秒让建议加载
-      # 步骤5: 查找THP类型的建议项
-    suggestion_selectors = [
-        # 优先选择THP类型（这是我们需要的）
-        f'text="{part_number} (THP_"',
-        f'[title*="{part_number}"][title*="THP"]',
-        
-        # 备选方案：其他类型
-        f'text="{part_number} (Product_"',
-        f'[title*="{part_number}"]'
-    ]
-    
-    print("开始查找搜索建议...")
-    for i, selector in enumerate(suggestion_selectors, 1):
-        try:
-            print(f"尝试选择器 {i}: {selector}")
-            element = page.locator(selector).first
-            
-            if element.is_visible(timeout=2000):
-                # 获取元素文本确认是THP类型
-                element_text = element.text_content()
-                print(f"找到建议项: {element_text}")
-                
-                # 优先选择THP类型
-                if "(THP_" in element_text:
-                    element.click()
-                    print(f"✅ 成功选择THP类型建议: {element_text}")
-                    return True
-                elif i <= 3:  # 前3个是THP相关的选择器
-                    element.click()
-                    print(f"✅ 选择了可能的THP项: {element_text}")
-                    return True
-                else:
-                    print(f"⚠️ 找到非THP项，继续查找: {element_text}")
-                    continue
-            else:
-                print(f"选择器 {i} 未找到可见元素")
-        except Exception as e:
-            print(f"选择器 {i} 失败: {e}")
-            continue
-      # 步骤6: 如果没有找到建议，尝试查看页面上的所有建议项
-    print("未找到预期的建议项，查看所有可用选项...")
+      # 步骤5: 获取所有建议项，用Python逻辑精确匹配
+    # 正确格式: title="100169&nbsp;(THP_xxxxxxx)" —— 括号内直接以 THP_ 开头
+    # 错误格式: title="100169&nbsp;(100169_THP_DOGA)" —— 括号内以件号开头
+    # 直接用 title 属性选择器匹配，无需处理 &nbsp; 空格问题
+    print("开始查找搜索建议（直接匹配 title 属性）...")
     try:
-        # 查找所有可能的建议项
+        # 先打印所有候选项供调试
         all_suggestions = page.locator(f'[title*="{part_number}"]').all()
-        if all_suggestions:
-            print(f"找到 {len(all_suggestions)} 个建议项:")
-            for i, suggestion in enumerate(all_suggestions):
-                try:
-                    text = suggestion.text_content()
-                    print(f"  {i+1}. {text}")
-                    # 如果找到THP类型，立即选择
-                    if "(THP_" in text:
-                        suggestion.click()
-                        print(f"✅ 从所有建议中选择了THP项: {text}")
-                        return True
-                except Exception as e:
-                    print(f"  {i+1}. 无法读取建议项: {e}")
-            
-            # 如果没有THP项，选择第一个
-            print("⚠️ 未找到THP项，选择第一个建议")
-            all_suggestions[0].click()
+        print(f"找到 {len(all_suggestions)} 个建议项:")
+        for i, suggestion in enumerate(all_suggestions):
+            try:
+                title = suggestion.get_attribute('title') or ''
+                print(f"  {i+1}. {title}")
+            except Exception as e:
+                print(f"  {i+1}. 无法读取title: {e}")
+
+        # 精确选择：title 属性中含 "(THP_" 的项（括号内直接以 THP_ 开头）
+        thp_element = page.locator(f'[title*="(THP_"]').first
+        if thp_element.is_visible(timeout=3000):
+            title = thp_element.get_attribute('title') or ''
+            thp_element.click()
+            print(f"✅ 选中正确的THP项: {title}")
             return True
+        else:
+            print(f"❌ 未检测到 THP 项（括号内以 THP_ 开头），搜索失败")
+            return False
     except Exception as e:
-        print(f"查看所有建议项失败: {e}")
+        print(f"查找建议项失败: {e}")
     
     # 步骤7: 最后的fallback - 直接按回车搜索
     print("⚠️ 没有找到任何搜索建议，使用回车键直接搜索")
