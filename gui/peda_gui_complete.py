@@ -183,6 +183,9 @@ class PEDAAutomationGUI:
 
         # 创建UI组件管理器
         self.ui_manager = UIComponentManager(self)
+
+        # 注册关闭窗口回调，确保处理线程能正确结束后再退出
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
         # 创建功能控制器
         self.function_controller = FunctionController(self)
         # 使用UI组件管理器创建界面
@@ -517,6 +520,15 @@ class PEDAAutomationGUI:
         except:
             return ""
             
+    def _on_close(self):
+        """关闭窗口时，等待处理线程正确结束再退出，确保浏览器资源被清理"""
+        self.is_processing = False  # 通知线程停止
+        t = getattr(self, 'processing_thread', None)
+        if t is not None and t.is_alive():
+            # 最多等待10秒，超时后强制退出
+            t.join(timeout=10)
+        self.root.destroy()
+
     def run(self):
         """运行GUI应用"""
         self.root.mainloop()

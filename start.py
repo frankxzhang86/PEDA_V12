@@ -51,7 +51,9 @@ def main():
         print("=" * 70)
         
         # 导入并启动GUI
+        print("⏳ 正在加载模块，首次启动可能需要几秒钟，请稍候...")
         from gui.peda_gui_complete import main as gui_main
+        print("✅ 模块加载完成，启动GUI...")
         gui_main()
         
     except ImportError as e:

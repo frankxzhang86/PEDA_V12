@@ -233,7 +233,8 @@ class FunctionController:
         self.reset_stats()
         
         # 在后台线程中运行处理
-        self.app.processing_thread = threading.Thread(target=self.run_processing, daemon=True)
+        # 注意：不使用 daemon=True，确保处理完成前浏览器资源能被正确清理
+        self.app.processing_thread = threading.Thread(target=self.run_processing, daemon=False)
         self.app.processing_thread.start()
         self.log_message("处理线程已启动", "INFO")
         

@@ -143,8 +143,32 @@ echo This may take a few minutes depending on your internet speed...
 echo Please be patient...
 echo.
 
+REM Export Windows trusted root CA certificates to a PEM file so that Node.js
+REM (used internally by the Playwright browser downloader) can trust corporate
+REM SSL-inspection proxies that insert self-signed certificates.
+set "CA_CERT_FILE=%TEMP%\playwright_ca_certs.pem"
+echo Exporting system CA certificates for Playwright download...
+powershell -NoProfile -Command ^
+  "$certs = Get-ChildItem -Path Cert:\LocalMachine\Root; " ^
+  "$pem = foreach ($c in $certs) { '-----BEGIN CERTIFICATE-----'; " ^
+  "  [Convert]::ToBase64String($c.RawData, 'InsertLineBreaks'); " ^
+  "  '-----END CERTIFICATE-----' }; " ^
+  "$pem | Set-Content -Encoding ASCII '%CA_CERT_FILE%'"
+if exist "%CA_CERT_FILE%" (
+    echo [OK] CA certificates exported to temporary file
+    set "NODE_EXTRA_CA_CERTS=%CA_CERT_FILE%"
+) else (
+    echo [WARNING] Could not export CA certificates, trying without...
+)
+
 python -m playwright install chromium
-if errorlevel 1 (
+set "PLAYWRIGHT_EXIT=%errorlevel%"
+
+REM Clean up temporary CA cert file
+if exist "%CA_CERT_FILE%" del /f /q "%CA_CERT_FILE%"
+set "NODE_EXTRA_CA_CERTS="
+
+if "%PLAYWRIGHT_EXIT%" NEQ "0" (
     echo ERROR: Failed to install Playwright browser
     pause
     exit /b 1

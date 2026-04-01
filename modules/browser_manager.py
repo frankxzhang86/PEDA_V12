@@ -296,6 +296,10 @@ class BrowserManager:
             if self.browser:
                 self.browser.close()
                 self.browser = None
+
+            if self.playwright:
+                self.playwright.stop()
+                self.playwright = None
                 
             self.page = None
             self.is_logged_in = False
