@@ -122,7 +122,27 @@ echo ========================================
 echo This may take several minutes, please wait...
 echo.
 
-python -m pip install -r requirements.txt
+REM Step 1: Install greenlet using pre-built binary only (avoids C++ compiler requirement)
+echo Installing greenlet (pre-built binary)...
+python -m pip install --only-binary :all: "greenlet>=2.0.0"
+if errorlevel 1 (
+    echo.
+    echo ERROR: Could not find a pre-built greenlet wheel for your Python version.
+    echo.
+    echo Solutions:
+    echo   [A] Use Python 3.8, 3.9, 3.10, 3.11, 3.12, or 3.13 ^(recommended^)
+    echo   [B] Install Microsoft C++ Build Tools from:
+    echo       https://visualstudio.microsoft.com/visual-cpp-build-tools/
+    echo.
+    pause
+    exit /b 1
+)
+echo greenlet installed successfully!
+echo.
+
+REM Step 2: Install remaining dependencies
+echo Installing remaining Python dependencies...
+python -m pip install --prefer-binary -r requirements.txt
 if errorlevel 1 (
     echo ERROR: Failed to install Python dependencies
     echo Please check your internet connection and try again
