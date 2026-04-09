@@ -194,6 +194,43 @@ def handle_login_popup(page):
 def enhanced_product_search(page, part_number):
     """增强的产品搜索方法，重点选择THP类型的结果"""
     search_box = page.locator("[id=\"Find_BP\\,_Products\\,_OE_Numbers\\,_THPs\"]").get_by_role("textbox", name="Search...")
+
+    def _get_locator_text(locator):
+        """优先读取 title，其次读取文本，便于稳定过滤当前件号候选项。"""
+        title = locator.get_attribute('title') or ''
+        if title:
+            return title
+
+        text = locator.text_content() or ''
+        return text.strip()
+
+    def _select_matching_thp(candidates, context_label):
+        """只从当前件号候选集里选择 THP 项，避免点到历史搜索结果。"""
+        matched_items = []
+
+        for candidate in candidates:
+            try:
+                if not candidate.is_visible(timeout=1000):
+                    continue
+
+                text = _get_locator_text(candidate)
+                if part_number in text and "(THP_" in text:
+                    matched_items.append((candidate, text))
+            except Exception as e:
+                print(f"跳过无法读取的候选项: {e}")
+
+        if not matched_items:
+            print(f"❌ {context_label}中未找到件号 {part_number} 的 THP 项")
+            return False
+
+        print(f"{context_label}中匹配到 {len(matched_items)} 个 THP 候选项:")
+        for index, (_, text) in enumerate(matched_items, 1):
+            print(f"  {index}. {text}")
+
+        target_locator, target_text = matched_items[0]
+        target_locator.click()
+        print(f"✅ 选中正确的THP项: {target_text}")
+        return True
     
     print(f"开始增强搜索: {part_number}")
     
@@ -202,18 +239,40 @@ def enhanced_product_search(page, part_number):
     page.wait_for_timeout(500)
     print("搜索框已获得焦点")
     
-    # 步骤2: 清空并逐字符输入
+    # 步骤2: 强制清空输入框，避免 Last search 或旧值干扰当前输入
+    search_box.press("Control+A")
+    search_box.press("Delete")
     search_box.clear()
+    page.wait_for_timeout(300)
+
+    current_value = search_box.input_value().strip()
+    if current_value:
+        print(f"检测到搜索框仍有残留内容: {current_value}，使用 fill 强制清空")
+        search_box.fill("")
+        page.wait_for_timeout(300)
+
     print("开始逐字符输入...")
     for i, char in enumerate(part_number):
         search_box.type(char, delay=150)  # 每字符150ms延迟
         if (i + 1) % 3 == 0:  # 每3个字符打印一次进度
             print(f"已输入: {part_number[:i+1]}")
+
+    final_input_value = search_box.input_value().strip()
+    if final_input_value != part_number:
+        print(f"检测到搜索框最终值不一致: {final_input_value}，重新填入目标件号")
+        search_box.fill(part_number)
+        page.wait_for_timeout(300)
+        final_input_value = search_box.input_value().strip()
+
+    if final_input_value != part_number:
+        print(f"❌ 搜索框未能稳定输入目标件号，当前值: {final_input_value}")
+        return False
     
     print(f"输入完成: {part_number}")
     
     # 步骤3: 触发搜索事件
     search_box.dispatch_event('input')
+    search_box.dispatch_event('change')
     search_box.dispatch_event('keyup')
     print("已触发搜索事件")
     
@@ -236,16 +295,11 @@ def enhanced_product_search(page, part_number):
             except Exception as e:
                 print(f"  {i+1}. 无法读取title: {e}")
 
-        # 精确选择：title 属性中含 "(THP_" 的项（括号内直接以 THP_ 开头）
-        thp_element = page.locator(f'[title*="(THP_"]').first
-        if thp_element.is_visible(timeout=3000):
-            title = thp_element.get_attribute('title') or ''
-            thp_element.click()
-            print(f"✅ 选中正确的THP项: {title}")
+        if _select_matching_thp(all_suggestions, "搜索建议"):
             return True
-        else:
-            print(f"❌ 未检测到 THP 项（括号内以 THP_ 开头），搜索失败")
-            return False
+
+        print(f"❌ 未检测到件号 {part_number} 对应的 THP 项，搜索失败")
+        return False
     except Exception as e:
         print(f"查找建议项失败: {e}")
     
@@ -258,19 +312,10 @@ def enhanced_product_search(page, part_number):
         result_elements = page.locator(f'[title*="{part_number}"]').all()
         if result_elements:
             print(f"搜索结果页面找到 {len(result_elements)} 个结果")
-            for element in result_elements:
-                try:
-                    text = element.text_content()
-                    if "(THP_" in text:
-                        element.click()
-                        print(f"✅ 从搜索结果选择了THP项: {text}")
-                        return True
-                except:
-                    continue
-            # 选择第一个结果
-            result_elements[0].click()
-            print("选择了第一个搜索结果")
-            return True
+            if _select_matching_thp(result_elements, "搜索结果页面"):
+                return True
+
+            print(f"❌ 搜索结果页面未找到件号 {part_number} 的 THP 项")
     except Exception as e:
         print(f"检查搜索结果失败: {e}")
     
