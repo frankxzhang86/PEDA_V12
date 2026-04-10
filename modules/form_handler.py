@@ -377,12 +377,16 @@ def save_and_validate_peda(page, part_number: str = None, document_manager = Non
             page.wait_for_timeout(2000)
             
             # 先检查Cover Sheet标签是否已经选中
+            tab_already_selected = False
             try:
                 if page.locator("#stibo_tab_Cover_Sheet.tabs-panel-tab--selected").is_visible(timeout=1000):
-                    print("✅ Cover Sheet标签已经是选中状态")
-                    return True
+                    print("✅ Cover Sheet标签已经是选中状态，跳过点击直接下载PDF")
+                    tab_already_selected = True
             except:
                 print("Cover Sheet标签当前未选中，需要点击")
+            
+            if tab_already_selected:
+                clicked = True  # 标签已选中，视为点击成功，继续执行PDF下载
             
             # 使用强制点击方法（根据日志验证有效）
             try:
