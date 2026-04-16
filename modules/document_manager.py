@@ -54,9 +54,17 @@ class DocumentManager:
             print(f"警告: {category_path} 不是一个目录")
             return files
         
+        # Windows 系统自动生成的文件，需要排除
+        _SYSTEM_FILES = {'desktop.ini', 'thumbs.db', 'thumbs.db:encryptable', '.ds_store'}
+
         try:
-            # 获取所有文件
-            all_files = [f for f in category_path.iterdir() if f.is_file()]
+            # 获取所有文件，排除系统隐藏文件
+            all_files = [
+                f for f in category_path.iterdir()
+                if f.is_file()
+                and f.name.lower() not in _SYSTEM_FILES
+                and not f.name.startswith('.')
+            ]
             
             for file_path in all_files:
                 # 验证文件是否有效（检查权限、大小等）
